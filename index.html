@@ -211,59 +211,52 @@
         window.onmousemove = (e) => { if (isPanning) { posX += e.movementX; posY += e.movementY; updateTransform(); } };
         window.onmouseup = () => { isPanning = false; isMouseDown = false; };
 
-        // Mobile Touch Panning & Pinch Zoom
+        // Mobile Touch Panning & Selection
         let lastTouchX = 0, lastTouchY = 0;
-        let initialPinchDistance = 0;
-        let initialScale = 1;
+        let isSelecting = false;
 
         viewport.ontouchstart = (e) => {
-            if (e.touches.length === 1 && !e.target.closest('.cell-input')) {
-                isPanning = true;
-                lastTouchX = e.touches[0].clientX;
-                lastTouchY = e.touches[0].clientY;
-            } else if (e.touches.length === 2) {
-                isPanning = false;
-                initialPinchDistance = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
-                initialScale = scale;
+            if (e.touches.length === 1) {
+                const target = e.target.closest('td');
+                if (target && !e.target.closest('.cell-input') && !e.target.closest('.pencil-icon')) {
+                    // Mobile Multi-Selection Start
+                    isSelecting = true;
+                    isPanning = false;
+                    startCell = target;
+                    selectRange(startCell, target);
+                } else if (!e.target.closest('.cell-input')) {
+                    // Panning Start
+                    isPanning = true;
+                    isSelecting = false;
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
+                }
             }
         };
 
         viewport.ontouchmove = (e) => {
-            if (e.touches.length === 1 && isPanning) {
-                const touch = e.touches[0];
-                posX += (touch.clientX - lastTouchX);
-                posY += (touch.clientY - lastTouchY);
-                lastTouchX = touch.clientX;
-                lastTouchY = touch.clientY;
-                updateTransform();
-            } else if (e.touches.length === 2) {
-                const currentDistance = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
-                const zoomFactor = currentDistance / initialPinchDistance;
-                const newScale = Math.min(Math.max(0.2, initialScale * zoomFactor), 3);
-                
-                // Optional: Zoom toward center of two fingers
-                const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-                const rect = wrapper.getBoundingClientRect();
-                const offsetX = centerX - rect.left, offsetY = centerY - rect.top;
-                
-                posX -= offsetX * (newScale / scale - 1);
-                posY -= offsetY * (newScale / scale - 1);
-                
-                scale = newScale;
-                updateTransform();
+            if (e.touches.length === 1) {
+                if (isPanning) {
+                    const touch = e.touches[0];
+                    posX += (touch.clientX - lastTouchX);
+                    posY += (touch.clientY - lastTouchY);
+                    lastTouchX = touch.clientX;
+                    lastTouchY = touch.clientY;
+                    updateTransform();
+                } else if (isSelecting) {
+                    const touch = e.touches[0];
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('td');
+                    if (target && target !== targetCell) {
+                        selectRange(startCell, target);
+                    }
+                }
             }
         };
 
         viewport.ontouchend = () => { 
             isPanning = false; 
-            initialPinchDistance = 0;
+            isSelecting = false;
+            isMouseDown = false;
         };
 
         function updateTransform() { wrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`; }
