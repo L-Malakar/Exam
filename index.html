@@ -211,26 +211,60 @@
         window.onmousemove = (e) => { if (isPanning) { posX += e.movementX; posY += e.movementY; updateTransform(); } };
         window.onmouseup = () => { isPanning = false; isMouseDown = false; };
 
-        // Mobile Touch Panning (Basic Implementation)
+        // Mobile Touch Panning & Pinch Zoom
         let lastTouchX = 0, lastTouchY = 0;
+        let initialPinchDistance = 0;
+        let initialScale = 1;
+
         viewport.ontouchstart = (e) => {
             if (e.touches.length === 1 && !e.target.closest('.cell-input')) {
                 isPanning = true;
                 lastTouchX = e.touches[0].clientX;
                 lastTouchY = e.touches[0].clientY;
+            } else if (e.touches.length === 2) {
+                isPanning = false;
+                initialPinchDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialScale = scale;
             }
         };
+
         viewport.ontouchmove = (e) => {
-            if (isPanning && e.touches.length === 1) {
+            if (e.touches.length === 1 && isPanning) {
                 const touch = e.touches[0];
                 posX += (touch.clientX - lastTouchX);
                 posY += (touch.clientY - lastTouchY);
                 lastTouchX = touch.clientX;
                 lastTouchY = touch.clientY;
                 updateTransform();
+            } else if (e.touches.length === 2) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const zoomFactor = currentDistance / initialPinchDistance;
+                const newScale = Math.min(Math.max(0.2, initialScale * zoomFactor), 3);
+                
+                // Optional: Zoom toward center of two fingers
+                const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                const rect = wrapper.getBoundingClientRect();
+                const offsetX = centerX - rect.left, offsetY = centerY - rect.top;
+                
+                posX -= offsetX * (newScale / scale - 1);
+                posY -= offsetY * (newScale / scale - 1);
+                
+                scale = newScale;
+                updateTransform();
             }
         };
-        viewport.ontouchend = () => { isPanning = false; };
+
+        viewport.ontouchend = () => { 
+            isPanning = false; 
+            initialPinchDistance = 0;
+        };
 
         function updateTransform() { wrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`; }
 
@@ -617,7 +651,7 @@
             if (!e.target.closest('td') && !e.target.closest('th') && !e.target.closest('#formattingToolbar') && !e.target.closest('#contextMenu') && !e.target.closest('#nameSearch') && !spacePressed) clearSelection();
         });
 
-        // Clipboard logic (Copy/Paste) - Unchanged but kept for functional completeness
+        // Clipboard logic (Copy/Paste)
         const processClipboard = (e, isCut = false) => {
             const selected = document.querySelectorAll('.selected-cell');
             if (selected.length > 0) {
