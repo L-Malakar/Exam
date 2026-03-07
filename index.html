@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Post - Advanced Smart Sheet</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            background-color: #f0f2f5; 
+            user-select: none; 
+            overflow: hidden; 
+            width: 100vw;
+            height: 100vh;
+            touch-action: none; /* Prevents browser pull-to-refresh during panning */
+        }
+        
+        #viewport {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            overflow: hidden;
+            position: relative;
+        }
+        #viewport:active { cursor: grabbing; }
+
+        #content-wrapper {
+            position: absolute;
+            transform-origin: 0 0;
+            padding: 20px; /* Reduced padding for mobile initial view */
+        }
+
+        .container { 
+            overflow: auto; 
+            border-radius: 8px; 
+            position: relative; 
+            max-width: 100vw;
+        }
+        
+        h2 { color: #1a73e8; margin-left: 20px; margin-bottom: 10px; }
+        
+        /* Search Bar Styles */
+        .search-container {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        #nameSearch {
+            padding: 10px 15px;
+            width: 300px;
+            max-width: 90%;
+            border: 1px solid #dadce0;
+            border-radius: 20px;
+            outline: none;
+            font-size: 16px; /* 16px prevents iOS auto-zoom on focus */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        #nameSearch:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 1px 6px rgba(32,33,36,0.28);
+        }
+
+        table { border-collapse: collapse; background: white; min-width: 100%; border: 1px solid #dadce0; table-layout: auto; }
+        th, td { border: 1px solid #dadce0; padding: 0; min-width: 100px; position: relative; height: 45px; box-sizing: border-box; white-space: nowrap; }
+        
+        th { 
+            background-color: #f8f9fa; 
+            padding: 10px; 
+            font-size: 13px; 
+            color: #5f6368; 
+            text-align: left; 
+            cursor: grab; 
+            position: relative; 
+            font-weight: bold; 
+            text-decoration: underline; 
+        }
+        th:active { cursor: grabbing; }
+        
+        .cell-input { 
+            width: 100%; height: 100%; padding: 12px; border: none; outline: none; 
+            box-sizing: border-box; font-size: 14px; background: transparent;
+            min-height: 45px; display: block; overflow: hidden; 
+            white-space: nowrap; 
+        }
+        .cell-input:focus { background-color: #e8f0fe; }
+
+        .checkbox-container { display: flex; justify-content: center; align-items: center; height: 100%; position: relative; }
+        .collected-check { transform: scale(1.4); cursor: pointer; z-index: 2; }
+        
+        td:first-child .cell-input {
+            font-weight: bold;
+        }
+
+        .pencil-icon {
+            position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+            background: #1a73e8; color: white; font-size: 12px; text-align: center;
+            line-height: 20px; border-radius: 2px; cursor: pointer; display: none; z-index: 10;
+        }
+        td.selected-cell .pencil-icon { display: block; }
+        
+        .selected-cell { background-color: rgba(26, 115, 232, 0.1) !important; outline: 1px solid #1a73e8; z-index: 5; }
+        .search-match { background-color: #fffde7 !important; outline: 2px solid #fbc02d; z-index: 6; }
+
+        .fill-handle {
+            position: absolute; width: 10px; height: 10px; background: #1a73e8;
+            border: 1px solid white; right: -5px; bottom: -5px; cursor: crosshair;
+            z-index: 20; display: none;
+        }
+        .last-selected .fill-handle { display: block; }
+
+        #contextMenu, #formattingToolbar {
+            display: none; position: absolute; background: white; border: 1px solid #ccc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; border-radius: 4px; padding: 5px;
+        }
+        #contextMenu button, #formattingToolbar button { 
+            display: inline-block; padding: 10px 15px; border: 1px solid transparent; 
+            background: none; cursor: pointer; font-size: 14px; border-radius: 3px;
+        }
+        #contextMenu button { display: block; width: 100%; text-align: left; }
+        
+        .hint { font-size: 0.85em; color: #666; margin: 10px 20px; background: #fff; padding: 10px; border-radius: 5px; display: inline-block; border: 1px solid #ddd; }
+
+        /* Mobile Responsive Overrides */
+        @media (max-width: 768px) {
+            #content-wrapper { padding: 10px; }
+            h2 { font-size: 1.2rem; margin-left: 10px; }
+            .hint { font-size: 0.75rem; margin: 10px; }
+            .search-container { margin-left: 10px; }
+            th, td { min-width: 80px; height: 40px; }
+            #formattingToolbar button { padding: 12px; } /* Larger touch targets */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="viewport">
+        <div id="content-wrapper">
+            <h2>Post Project</h2>
+            
+            <div class="search-container">
+                <input type="text" id="nameSearch" placeholder="🔍 Search name..." oninput="searchName()">
+            </div>
+
+            <div class="hint">✏️ <b>Pencil:</b> Formatting | 🖱️ <b>Hold/Right Click:</b> Menu | ⌨️ <b>Enter:</b> Next</div>
+
+            <div class="container">
+                <table id="postTable">
+                    <thead><tr id="headerRow"></tr></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="formattingToolbar">
+        <button id="btn-bold" onclick="applyStyle('bold')"><b>B</b></button>
+        <button id="btn-italic" onclick="applyStyle('italic')"><i>I</i></button>
+        <button id="btn-underline" onclick="applyStyle('underline')"><u>U</u></button>
+        <div class="toolbar-sep"></div>
+        <button onclick="applyStyle('justifyLeft')">L</button>
+        <button onclick="applyStyle('justifyCenter')">C</button>
+        <button onclick="applyStyle('justifyRight')">R</button>
+    </div>
+
+    <div id="contextMenu">
+        <button onclick="deleteSelectedCellsContent()" style="color:blue; font-weight:bold;">Delete Content</button>
+        <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
+        <button onclick="addRowAt()">Insert Row Below</button>
+        <button onclick="deleteRowAt()" style="color:red;">Delete Row</button>
+        <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
+        <button onclick="addColumnAt()">Insert Col Right</button>
+        <button onclick="deleteColumnAt()" style="color:red;">Delete Col</button>
+    </div>
+
+    <script>
+        let targetCell = null;
+        let isMouseDown = false;
+        let startCell = null;
+        let draggedColIdx = null;
+
+        let scale = 1, posX = 0, posY = 0, isPanning = false, spacePressed = false;
+        const viewport = document.getElementById('viewport');
+        const wrapper = document.getElementById('content-wrapper');
+
+        const defaultHeaders = ["No.", "Name", "A/c No", "Amount", "Date of Opening", "Month", "Collected", "Total Balance"];
+        const defaultRows = [["1", "", "", "", "dd/mm/yyyy", "", "false", ""]];
+
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        window.onload = loadData;
+
+        // Mouse Wheel Zoom
+        viewport.onwheel = (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            const newScale = Math.min(Math.max(0.2, scale + delta), 3);
+            const rect = wrapper.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
+            posX -= mouseX * (newScale / scale - 1);
+            posY -= mouseY * (newScale / scale - 1);
+            scale = newScale;
+            updateTransform();
+        };
+
+        // Keyboard support
+        window.onkeydown = (e) => { if(e.code === 'Space') spacePressed = true; };
+        window.onkeyup = (e) => { if(e.code === 'Space') spacePressed = false; };
+
+        // Desktop Panning
+        viewport.onmousedown = (e) => { if (spacePressed || e.button === 1) isPanning = true; };
+        window.onmousemove = (e) => { if (isPanning) { posX += e.movementX; posY += e.movementY; updateTransform(); } };
+        window.onmouseup = () => { isPanning = false; isMouseDown = false; };
+
+        // Mobile Touch Panning (Basic Implementation)
+        let lastTouchX = 0, lastTouchY = 0;
+        viewport.ontouchstart = (e) => {
+            if (e.touches.length === 1 && !e.target.closest('.cell-input')) {
+                isPanning = true;
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+            }
+        };
+        viewport.ontouchmove = (e) => {
+            if (isPanning && e.touches.length === 1) {
+                const touch = e.touches[0];
+                posX += (touch.clientX - lastTouchX);
+                posY += (touch.clientY - lastTouchY);
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+                updateTransform();
+            }
+        };
+        viewport.ontouchend = () => { isPanning = false; };
+
+        function updateTransform() { wrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`; }
+
+        function updateRowNumbers() {
+            const rows = document.getElementById("tableBody").rows;
+            for (let i = 0; i < rows.length; i++) {
+                const noCell = rows[i].cells[0].querySelector('.cell-input');
+                if(noCell) noCell.innerText = i + 1;
+            }
+        }
+
+        function searchName() {
+            const query = document.getElementById("nameSearch").value.toLowerCase().trim();
+            const rows = document.getElementById("tableBody").rows;
+            document.querySelectorAll('.search-match').forEach(el => el.classList.remove('search-match'));
+            if (query === "") return;
+            const headers = Array.from(document.querySelectorAll("#headerRow th"));
+            const nameColIdx = headers.findIndex(th => th.innerText.includes("Name"));
+            if (nameColIdx === -1) return;
+
+            for (let i = 0; i < rows.length; i++) {
+                const nameCell = rows[i].cells[nameColIdx];
+                const nameInput = nameCell.querySelector('.cell-input');
+                const nameText = nameInput ? nameInput.innerText.toLowerCase() : "";
+                if (nameText.includes(query)) {
+                    Array.from(rows[i].cells).forEach(cell => cell.classList.add('search-match'));
+                    const rect = rows[i].getBoundingClientRect();
+                    posY -= (rect.top - 200); 
+                    updateTransform();
+                    break;
+                }
+            }
+        }
+
+        function calculateTotalBalance(row) {
+            const cells = row.cells;
+            const amountInput = cells[3].querySelector('.cell-input');
+            const dateInput = cells[4].querySelector('.cell-input');
+            const monthInput = cells[5].querySelector('.cell-input');
+            const collectedCheck = cells[6].querySelector('.collected-check');
+            const totalBalanceInput = cells[7].querySelector('.cell-input');
+
+            if (!amountInput || !dateInput || !monthInput || !totalBalanceInput || !collectedCheck) return;
+
+            let amount = parseFloat(amountInput.innerText.replace(/[^0-9.]/g, ''));
+            let dateText = dateInput.innerText.trim();
+            let selectedMonthName = monthInput.innerText.trim();
+            let isCollected = collectedCheck.checked;
+
+            if (!isNaN(amount) && dateText.includes('/') && dateText !== "dd/mm/yyyy" && selectedMonthName) {
+                const parts = dateText.split('/');
+                const openingDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                const targetMonthIdx = monthNames.findIndex(m => m.toLowerCase() === selectedMonthName.toLowerCase());
+                
+                if (!isNaN(openingDate) && targetMonthIdx !== -1) {
+                    const currentYear = new Date().getFullYear();
+                    const targetDate = new Date(currentYear, targetMonthIdx, 1);
+                    let monthsDiff = (targetDate.getFullYear() - openingDate.getFullYear()) * 12 + (targetDate.getMonth() - openingDate.getMonth()) + 1;
+                    if (!isCollected) monthsDiff -= 1;
+                    if (monthsDiff < 0) monthsDiff = 0;
+                    const total = amount * monthsDiff;
+                    totalBalanceInput.innerText = new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(total) + "₹";
+                }
+            }
+        }
+
+        function saveData() {
+            const headers = Array.from(document.querySelectorAll("#headerRow th")).map(th => th.innerText);
+            const rows = Array.from(document.querySelectorAll("#tableBody tr")).map(tr => {
+                return Array.from(tr.cells).map(td => {
+                    const input = td.querySelector('.cell-input');
+                    const checkbox = td.querySelector('.collected-check');
+                    if(checkbox) return checkbox.checked.toString();
+                    return input ? input.innerHTML : "";
+                });
+            });
+            localStorage.setItem('postDataHeaders', JSON.stringify(headers));
+            localStorage.setItem('postDataRows', JSON.stringify(rows));
+        }
+
+        function loadData() {
+            const savedHeaders = JSON.parse(localStorage.getItem('postDataHeaders')) || defaultHeaders;
+            const savedRows = JSON.parse(localStorage.getItem('postDataRows')) || defaultRows;
+            const headerRow = document.getElementById("headerRow");
+            headerRow.innerHTML = "";
+            savedHeaders.forEach(text => headerRow.appendChild(createHeader(text)));
+            const tableBody = document.getElementById("tableBody");
+            tableBody.innerHTML = "";
+            savedRows.forEach((rowData, index) => {
+                const row = tableBody.insertRow();
+                rowData.forEach((cellData, colIndex) => {
+                    let val = (colIndex === 0) ? (index + 1).toString() : cellData;
+                    createCell(row, val, -1, savedHeaders[colIndex]);
+                });
+            });
+            updateTransform();
+        }
+
+        function createHeader(text) {
+            const th = document.createElement("th");
+            th.innerText = text;
+            th.draggable = true;
+            th.ondblclick = () => editHeader(th);
+            th.onmousedown = (e) => { if(!spacePressed) selectColumn(th.cellIndex); };
+            th.ondragstart = (e) => { draggedColIdx = th.cellIndex; e.dataTransfer.setData("text/plain", draggedColIdx); };
+            th.ondragover = (e) => { e.preventDefault(); th.classList.add('drag-over'); };
+            th.ondragleave = () => th.classList.remove('drag-over');
+            th.ondrop = (e) => {
+                e.preventDefault();
+                th.classList.remove('drag-over');
+                const targetIdx = th.cellIndex;
+                if (draggedColIdx !== null && draggedColIdx !== targetIdx) moveColumn(draggedColIdx, targetIdx);
+            };
+            return th;
+        }
+
+        function selectColumn(colIdx) {
+            clearSelection();
+            const table = document.getElementById("postTable");
+            for (let i = 1; i < table.rows.length; i++) {
+                const cell = table.rows[i].cells[colIdx];
+                cell.classList.add("selected-cell");
+                if (i === table.rows.length - 1) cell.classList.add("last-selected");
+            }
+            targetCell = table.rows[1].cells[colIdx];
+        }
+
+        function moveColumn(fromIdx, toIdx) {
+            const table = document.getElementById("postTable");
+            Array.from(table.rows).forEach(row => {
+                const cells = Array.from(row.cells);
+                if (toIdx >= cells.length) row.appendChild(cells[fromIdx]);
+                else row.insertBefore(cells[fromIdx], cells[toIdx]);
+            });
+            updateRowNumbers();
+            saveData();
+        }
+
+        function editHeader(th) {
+            const newName = prompt("Rename Header:", th.innerText);
+            if(newName) { th.innerText = newName; saveData(); }
+        }
+
+        function createCell(row, value = "", index = -1, headerName = "") {
+            const cell = index === -1 ? row.insertCell() : row.insertCell(index);
+            const colIndex = index === -1 ? cell.cellIndex : index;
+            const currentHeader = headerName || document.getElementById("headerRow").cells[colIndex]?.innerText;
+
+            const pencil = document.createElement("div");
+            pencil.className = "pencil-icon";
+            pencil.innerHTML = "✎";
+            pencil.onclick = (e) => { e.stopPropagation(); showToolbar(e, cell); };
+            
+            const dot = document.createElement("div");
+            dot.className = "fill-handle";
+
+            cell.appendChild(pencil);
+            cell.appendChild(dot);
+
+            if (currentHeader === "Collected") {
+                const div = document.createElement("div");
+                div.className = "checkbox-container";
+                const check = document.createElement("input");
+                check.type = "checkbox";
+                check.className = "collected-check";
+                check.checked = (value === "true");
+                const textInput = document.createElement("div");
+                textInput.className = "cell-input";
+                textInput.contentEditable = "true";
+                textInput.style.position = "absolute";
+                textInput.style.opacity = "0"; 
+                textInput.oninput = () => {
+                    let val = textInput.innerText.trim().toLowerCase();
+                    if (val === "y" || val === "yes") { check.checked = true; textInput.innerText = ""; } 
+                    else if (val === "n" || val === "no") { check.checked = false; textInput.innerText = ""; }
+                    calculateTotalBalance(row);
+                    saveData();
+                };
+                check.onchange = () => { calculateTotalBalance(row); saveData(); };
+                div.appendChild(check);
+                div.appendChild(textInput);
+                cell.appendChild(div);
+            } else {
+                const input = document.createElement("div");
+                input.className = "cell-input";
+                input.contentEditable = (currentHeader === "Total Balance") ? "false" : "true";
+                input.inputMode = (currentHeader === "Amount" || currentHeader === "A/c No") ? "decimal" : "text";
+
+                if (currentHeader === "Date of Opening") {
+                    if (value === "" || value === "dd/mm/yyyy") {
+                        input.innerHTML = "dd/mm/yyyy";
+                        input.classList.add("placeholder-text");
+                    } else { input.innerHTML = value; }
+                } else { input.innerHTML = value; }
+
+                if (currentHeader === "Amount") {
+                    input.oninput = (e) => {
+                        const filtered = input.innerText.replace(/[^0-9.₹$€£¥]/g, '');
+                        if (input.innerText !== filtered) input.innerText = filtered;
+                        calculateTotalBalance(row);
+                        saveData();
+                    };
+                    input.onblur = () => {
+                        let text = input.innerText;
+                        let numeric = text.replace(/[^0-9.]/g, '');
+                        let symbol = text.replace(/[0-9.]/g, '') || "₹";
+                        if (numeric && !isNaN(numeric)) {
+                            input.innerText = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric) + symbol;
+                        }
+                        calculateTotalBalance(row);
+                        saveData();
+                    };
+                }
+
+                if (currentHeader === "Date of Opening") {
+                    const datePicker = document.createElement("input");
+                    datePicker.type = "date";
+                    datePicker.className = "date-picker-hidden";
+                    cell.appendChild(datePicker);
+                    input.onfocus = () => { if (input.innerText === "dd/mm/yyyy") { input.innerText = ""; input.classList.remove("placeholder-text"); } };
+                    input.onblur = () => { if (input.innerText.trim() === "") { input.innerText = "dd/mm/yyyy"; input.classList.add("placeholder-text"); } };
+                    input.onclick = () => { if(input.innerText.trim() === "" || input.innerText === "dd/mm/yyyy") datePicker.showPicker(); };
+                    datePicker.onchange = () => {
+                        const d = new Date(datePicker.value);
+                        if(!isNaN(d)) {
+                            input.innerText = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                            input.classList.remove("placeholder-text");
+                            calculateTotalBalance(row);
+                            saveData();
+                        }
+                    };
+                }
+
+                if (currentHeader === "Month") {
+                    input.onblur = () => {
+                        let val = input.innerText.trim().toLowerCase();
+                        let found = monthNames.find(m => m.toLowerCase().startsWith(val));
+                        if(found && val !== "") input.innerText = found;
+                        else if (val !== "" && !monthNames.map(m => m.toLowerCase()).includes(val)) input.innerText = ""; 
+                        calculateTotalBalance(row);
+                        saveData();
+                    };
+                }
+
+                input.onkeydown = (e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        const body = document.getElementById("tableBody");
+                        if (currentHeader === "Month") {
+                            const newRow = body.insertRow();
+                            const headers = Array.from(document.querySelectorAll("#headerRow th"));
+                            headers.forEach((th, i) => {
+                                let initialVal = (i === 0) ? (body.rows.length).toString() : (th.innerText === "Collected" ? "false" : (th.innerText === "Date of Opening" ? "dd/mm/yyyy" : ""));
+                                createCell(newRow, initialVal, -1, th.innerText);
+                            });
+                            saveData();
+                            newRow.cells[1].querySelector('.cell-input').focus();
+                            return;
+                        }
+                        // Search empty logic
+                        const table = document.getElementById("postTable");
+                        let foundEmpty = false;
+                        for (let c = cell.cellIndex; c < table.rows[0].cells.length; c++) {
+                            let startR = (c === cell.cellIndex) ? cell.parentElement.rowIndex + 1 : 1;
+                            for (let r = startR; r < table.rows.length; r++) {
+                                let checkInput = table.rows[r].cells[c].querySelector('.cell-input');
+                                if (checkInput && (checkInput.innerText.trim() === "" || checkInput.innerText === "dd/mm/yyyy")) {
+                                    checkInput.focus();
+                                    foundEmpty = true;
+                                    break;
+                                }
+                            }
+                            if (foundEmpty) break;
+                        }
+                        if (!foundEmpty) {
+                            const newRow = body.insertRow();
+                            const headers = Array.from(document.querySelectorAll("#headerRow th"));
+                            headers.forEach((th, i) => {
+                                let initialVal = (i === 0) ? (body.rows.length).toString() : (th.innerText === "Collected" ? "false" : (th.innerText === "Date of Opening" ? "dd/mm/yyyy" : ""));
+                                createCell(newRow, initialVal, -1, th.innerText);
+                            });
+                            saveData();
+                            newRow.cells[1].querySelector('.cell-input').focus();
+                        }
+                    }
+                };
+                input.oninput = input.oninput || (() => saveData());
+                cell.appendChild(input);
+            }
+
+            cell.onmousedown = (e) => {
+                if(e.target.className === 'pencil-icon' || spacePressed) return;
+                isMouseDown = true;
+                startCell = cell;
+                selectRange(startCell, cell);
+            };
+            cell.onmouseenter = () => { if (isMouseDown) selectRange(startCell, cell); };
+            cell.oncontextmenu = (e) => showMenu(e, cell);
+            return cell;
+        }
+
+        function selectRange(start, end) {
+            clearSelection();
+            const table = document.getElementById("postTable");
+            const x1 = start.cellIndex, y1 = start.parentElement.rowIndex - 1;
+            const x2 = end.cellIndex, y2 = end.parentElement.rowIndex - 1;
+            const minX = Math.min(x1, x2), maxX = Math.max(x1, x2);
+            const minY = Math.min(y1, y2), maxY = Math.max(y1, y2);
+            for (let y = minY; y <= maxY; y++) {
+                for (let x = minX; x <= maxX; x++) {
+                    const c = table.rows[y + 1].cells[x];
+                    c.classList.add("selected-cell");
+                    if (y === maxY && x === maxX) c.classList.add("last-selected");
+                }
+            }
+            targetCell = end;
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.selected-cell').forEach(c => c.classList.remove('selected-cell', 'last-selected'));
+            document.querySelectorAll('.search-match').forEach(c => c.classList.remove('search-match'));
+        }
+
+        function deleteSelectedCellsContent() {
+            const selected = document.querySelectorAll('.selected-cell');
+            selected.forEach(cell => {
+                if (cell.cellIndex !== 0) {
+                    const input = cell.querySelector('.cell-input');
+                    const check = cell.querySelector('.collected-check');
+                    if(input) {
+                        input.innerHTML = (document.getElementById("headerRow").cells[cell.cellIndex]?.innerText === "Date of Opening") ? "dd/mm/yyyy" : "";
+                        if(input.innerHTML === "dd/mm/yyyy") input.classList.add("placeholder-text");
+                        input.style.fontWeight = "normal"; input.style.textDecoration = "none"; input.style.fontStyle = "normal"; input.style.textAlign = "left";
+                    }
+                    if(check) { check.checked = false; calculateTotalBalance(cell.parentElement); }
+                }
+            });
+            saveData();
+            document.getElementById("contextMenu").style.display = "none";
+        }
+
+        function showToolbar(e, cell) {
+            const toolbar = document.getElementById("formattingToolbar");
+            const input = cell.querySelector('.cell-input');
+            if(!input) return;
+            toolbar.style.display = "block";
+            const rect = cell.getBoundingClientRect();
+            toolbar.style.left = Math.min(rect.left, window.innerWidth - 200) + "px";
+            toolbar.style.top = (rect.top - 60) + "px";
+            input.focus();
+        }
+
+        function applyStyle(command) {
+            const selected = document.querySelectorAll('.selected-cell');
+            if (selected.length > 0) {
+                selected.forEach(cell => {
+                    const input = cell.querySelector('.cell-input');
+                    if(input){
+                        input.focus();
+                        document.execCommand('selectAll', false, null);
+                        document.execCommand(command, false, null);
+                        window.getSelection().removeAllRanges();
+                    }
+                });
+            } else { document.execCommand(command, false, null); }
+            saveData();
+        }
+
+        function showMenu(e, cell) {
+            e.preventDefault();
+            targetCell = cell;
+            const menu = document.getElementById("contextMenu");
+            menu.style.display = "block";
+            menu.style.left = Math.min(e.pageX, window.innerWidth - 150) + "px";
+            menu.style.top = Math.min(e.pageY, window.innerHeight - 200) + "px";
+        }
+
+        document.addEventListener("mousedown", (e) => {
+            if (!e.target.closest('#formattingToolbar') && !e.target.closest('.pencil-icon')) document.getElementById("formattingToolbar").style.display = "none";
+            if (!e.target.closest('#contextMenu')) document.getElementById("contextMenu").style.display = "none";
+            if (!e.target.closest('td') && !e.target.closest('th') && !e.target.closest('#formattingToolbar') && !e.target.closest('#contextMenu') && !e.target.closest('#nameSearch') && !spacePressed) clearSelection();
+        });
+
+        // Clipboard logic (Copy/Paste) - Unchanged but kept for functional completeness
+        const processClipboard = (e, isCut = false) => {
+            const selected = document.querySelectorAll('.selected-cell');
+            if (selected.length > 0) {
+                e.preventDefault();
+                let textData = "";
+                const table = document.getElementById("postTable");
+                let minR = 9999, maxR = 0, minC = 9999, maxC = 0;
+                selected.forEach(c => {
+                    const r = c.parentElement.rowIndex, col = c.cellIndex;
+                    minR = Math.min(minR, r); maxR = Math.max(maxR, r);
+                    minC = Math.min(minC, col); maxC = Math.max(maxC, col);
+                });
+                for (let i = minR; i <= maxR; i++) {
+                    let rowData = [];
+                    for (let j = minC; j <= maxC; j++) {
+                        const cell = table.rows[i].cells[j];
+                        const cellInput = cell.querySelector('.cell-input');
+                        const check = cell.querySelector('.collected-check');
+                        let val = check ? (check.checked ? "YES" : "NO") : (cellInput ? cellInput.innerText : "");
+                        rowData.push(val);
+                        if(isCut && j !== 0 && cellInput) cellInput.innerHTML = "";
+                    }
+                    textData += rowData.join("\t") + "\n";
+                }
+                e.clipboardData.setData('text/plain', textData.trim());
+                if(isCut) saveData();
+            }
+        };
+
+        document.addEventListener('copy', (e) => processClipboard(e, false));
+        document.addEventListener('cut', (e) => processClipboard(e, true));
+        document.addEventListener('paste', (e) => {
+            if (!targetCell) return;
+            e.preventDefault();
+            const text = e.clipboardData.getData('text/plain');
+            const rows = text.split(/\r?\n/), table = document.getElementById("postTable");
+            const startRow = targetCell.parentElement.rowIndex, startCol = targetCell.cellIndex;
+            rows.forEach((rowText, i) => {
+                rowText.split('\t').forEach((cellText, j) => {
+                    const targetRow = table.rows[startRow + i];
+                    if (targetRow && targetRow.cells[startCol + j] && (startCol + j) !== 0) {
+                        const cell = targetRow.cells[startCol + j];
+                        const input = cell.querySelector('.cell-input');
+                        const check = cell.querySelector('.collected-check');
+                        if(check) { check.checked = (cellText.toUpperCase() === "YES" || cellText === "true"); calculateTotalBalance(targetRow); }
+                        if(input) { input.innerHTML = cellText; input.classList.remove("placeholder-text"); calculateTotalBalance(targetRow); }
+                    }
+                });
+            });
+            saveData();
+        });
+
+        function addRowAt() {
+            const idx = targetCell.parentElement.rowIndex;
+            const body = document.getElementById("tableBody");
+            const newRow = body.insertRow(idx);
+            Array.from(document.querySelectorAll("#headerRow th")).forEach((th) => createCell(newRow, (th.innerText === "Date of Opening" ? "dd/mm/yyyy" : ""), -1, th.innerText));
+            updateRowNumbers(); saveData();
+        }
+
+        function deleteRowAt() { if(confirm("Delete row?")) { targetCell.parentElement.remove(); updateRowNumbers(); saveData(); } }
+
+        function addColumnAt() {
+            const colName = prompt("Column Name?", "New Column");
+            if (!colName) return;
+            const colIndex = targetCell.cellIndex;
+            document.getElementById("headerRow").insertBefore(createHeader(colName), document.getElementById("headerRow").cells[colIndex + 1]);
+            Array.from(document.getElementById("tableBody").rows).forEach(row => createCell(row, "", colIndex + 1, colName));
+            saveData();
+        }
+
+        function deleteColumnAt() {
+            if(confirm("Delete column?")) {
+                const colIndex = targetCell.cellIndex;
+                if(colIndex === 0) return;
+                document.getElementById("headerRow").deleteCell(colIndex);
+                Array.from(document.getElementById("tableBody").rows).forEach(row => row.deleteCell(colIndex));
+                saveData();
+            }
+        }
+    </script>
+</body>
+</html>
