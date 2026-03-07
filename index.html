@@ -120,6 +120,9 @@
         
         .hint { font-size: 0.85em; color: #666; margin: 10px 20px; background: #fff; padding: 10px; border-radius: 5px; display: inline-block; border: 1px solid #ddd; }
 
+        .extra-option { margin: 5px; padding: 5px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 5px; font-size: 13px; }
+        .extra-option select, .extra-option input { padding: 3px; border: 1px solid #ddd; border-radius: 3px; }
+
         /* Mobile Responsive Overrides */
         @media (max-width: 768px) {
             #content-wrapper { padding: 10px; }
@@ -153,13 +156,30 @@
     </div>
 
     <div id="formattingToolbar">
-        <button id="btn-bold" onclick="applyStyle('bold')"><b>B</b></button>
-        <button id="btn-italic" onclick="applyStyle('italic')"><i>I</i></button>
-        <button id="btn-underline" onclick="applyStyle('underline')"><u>U</u></button>
-        <div class="toolbar-sep"></div>
-        <button onclick="applyStyle('justifyLeft')">L</button>
-        <button onclick="applyStyle('justifyCenter')">C</button>
-        <button onclick="applyStyle('justifyRight')">R</button>
+        <div id="standard-tools">
+            <button id="btn-bold" onclick="applyStyle('bold')"><b>B</b></button>
+            <button id="btn-italic" onclick="applyStyle('italic')"><i>I</i></button>
+            <button id="btn-underline" onclick="applyStyle('underline')"><u>U</u></button>
+            <button onclick="applyStyle('justifyLeft')">L</button>
+            <button onclick="applyStyle('justifyCenter')">C</button>
+            <button onclick="applyStyle('justifyRight')">R</button>
+        </div>
+        
+        <div id="currency-option" class="extra-option" style="display:none;">
+            <span>Currency:</span>
+            <select id="currencySelect" onchange="changeCurrency()">
+                <option value="₹">₹ (INR)</option>
+                <option value="$">$ (USD)</option>
+                <option value="€">€ (EUR)</option>
+                <option value="£">£ (GBP)</option>
+                <option value="¥">¥ (JPY)</option>
+            </select>
+        </div>
+
+        <div id="year-option" class="extra-option" style="display:none;">
+            <span>Year:</span>
+            <input type="number" id="yearInput" value="2026" style="width: 60px;" oninput="changeYear()">
+        </div>
     </div>
 
     <div id="contextMenu">
@@ -247,7 +267,6 @@
                 const zoomFactor = currentDistance / initialPinchDistance;
                 const newScale = Math.min(Math.max(0.2, initialScale * zoomFactor), 3);
                 
-                // Optional: Zoom toward center of two fingers
                 const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
                 const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
                 const rect = wrapper.getBoundingClientRect();
@@ -309,9 +328,13 @@
 
             if (!amountInput || !dateInput || !monthInput || !totalBalanceInput || !collectedCheck) return;
 
-            let amount = parseFloat(amountInput.innerText.replace(/[^0-9.]/g, ''));
+            let amountText = amountInput.innerText;
+            let amount = parseFloat(amountText.replace(/[^0-9.]/g, ''));
+            let symbol = amountText.replace(/[0-9.,\s]/g, '') || "₹";
+            
             let dateText = dateInput.innerText.trim();
             let selectedMonthName = monthInput.innerText.trim();
+            let selectedYear = parseInt(monthInput.dataset.year) || 2026;
             let isCollected = collectedCheck.checked;
 
             if (!isNaN(amount) && dateText.includes('/') && dateText !== "dd/mm/yyyy" && selectedMonthName) {
@@ -320,16 +343,17 @@
                 const targetMonthIdx = monthNames.findIndex(m => m.toLowerCase() === selectedMonthName.toLowerCase());
                 
                 if (!isNaN(openingDate) && targetMonthIdx !== -1) {
-                    const currentYear = new Date().getFullYear();
-                    const targetDate = new Date(currentYear, targetMonthIdx, 1);
+                    const targetDate = new Date(selectedYear, targetMonthIdx, 1);
                     let monthsDiff = (targetDate.getFullYear() - openingDate.getFullYear()) * 12 + (targetDate.getMonth() - openingDate.getMonth()) + 1;
                     if (!isCollected) monthsDiff -= 1;
                     if (monthsDiff < 0) monthsDiff = 0;
                     const total = amount * monthsDiff;
-                    totalBalanceInput.innerText = new Intl.NumberFormat('en-IN', {
+                    
+                    let formatter = (symbol === '₹') ? 'en-IN' : 'en-US';
+                    totalBalanceInput.innerText = new Intl.NumberFormat(formatter, {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
-                    }).format(total) + "₹";
+                    }).format(total) + symbol;
                 }
             }
         }
@@ -341,6 +365,7 @@
                     const input = td.querySelector('.cell-input');
                     const checkbox = td.querySelector('.collected-check');
                     if(checkbox) return checkbox.checked.toString();
+                    if(input && input.dataset.year) return input.innerHTML + "||year:" + input.dataset.year;
                     return input ? input.innerHTML : "";
                 });
             });
@@ -456,12 +481,21 @@
                 input.contentEditable = (currentHeader === "Total Balance") ? "false" : "true";
                 input.inputMode = (currentHeader === "Amount" || currentHeader === "A/c No") ? "decimal" : "text";
 
+                let displayValue = value;
+                if (value.includes("||year:")) {
+                    let parts = value.split("||year:");
+                    displayValue = parts[0];
+                    input.dataset.year = parts[1];
+                } else if (currentHeader === "Month") {
+                    input.dataset.year = "2026";
+                }
+
                 if (currentHeader === "Date of Opening") {
-                    if (value === "" || value === "dd/mm/yyyy") {
+                    if (displayValue === "" || displayValue === "dd/mm/yyyy") {
                         input.innerHTML = "dd/mm/yyyy";
                         input.classList.add("placeholder-text");
-                    } else { input.innerHTML = value; }
-                } else { input.innerHTML = value; }
+                    } else { input.innerHTML = displayValue; }
+                } else { input.innerHTML = displayValue; }
 
                 if (currentHeader === "Amount") {
                     input.oninput = (e) => {
@@ -475,7 +509,8 @@
                         let numeric = text.replace(/[^0-9.]/g, '');
                         let symbol = text.replace(/[0-9.]/g, '') || "₹";
                         if (numeric && !isNaN(numeric)) {
-                            input.innerText = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric) + symbol;
+                            let formatter = (symbol === '₹') ? 'en-IN' : 'en-US';
+                            input.innerText = new Intl.NumberFormat(formatter, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric) + symbol;
                         }
                         calculateTotalBalance(row);
                         saveData();
@@ -486,6 +521,7 @@
                     const datePicker = document.createElement("input");
                     datePicker.type = "date";
                     datePicker.className = "date-picker-hidden";
+                    datePicker.style.display = "none";
                     cell.appendChild(datePicker);
                     input.onfocus = () => { if (input.innerText === "dd/mm/yyyy") { input.innerText = ""; input.classList.remove("placeholder-text"); } };
                     input.onblur = () => { if (input.innerText.trim() === "") { input.innerText = "dd/mm/yyyy"; input.classList.add("placeholder-text"); } };
@@ -527,7 +563,6 @@
                             newRow.cells[1].querySelector('.cell-input').focus();
                             return;
                         }
-                        // Search empty logic
                         const table = document.getElementById("postTable");
                         let foundEmpty = false;
                         for (let c = cell.cellIndex; c < table.rows[0].cells.length; c++) {
@@ -613,11 +648,46 @@
             const toolbar = document.getElementById("formattingToolbar");
             const input = cell.querySelector('.cell-input');
             if(!input) return;
+            
+            targetCell = cell;
+            const headerText = document.getElementById("headerRow").cells[cell.cellIndex].innerText;
+            
+            document.getElementById('currency-option').style.display = (headerText === "Amount") ? "flex" : "none";
+            document.getElementById('year-option').style.display = (headerText === "Month") ? "flex" : "none";
+            
+            if (headerText === "Amount") {
+                const currentSym = input.innerText.replace(/[0-9.,\s]/g, '') || "₹";
+                document.getElementById('currencySelect').value = currentSym;
+            }
+            if (headerText === "Month") {
+                document.getElementById('yearInput').value = input.dataset.year || "2026";
+            }
+
             toolbar.style.display = "block";
             const rect = cell.getBoundingClientRect();
-            toolbar.style.left = Math.min(rect.left, window.innerWidth - 200) + "px";
-            toolbar.style.top = (rect.top - 60) + "px";
+            toolbar.style.left = Math.min(rect.left, window.innerWidth - 220) + "px";
+            toolbar.style.top = (rect.top - 100) + "px";
             input.focus();
+        }
+
+        function changeCurrency() {
+            const symbol = document.getElementById('currencySelect').value;
+            const input = targetCell.querySelector('.cell-input');
+            let numeric = input.innerText.replace(/[^0-9.]/g, '');
+            if (numeric) {
+                let formatter = (symbol === '₹') ? 'en-IN' : 'en-US';
+                input.innerText = new Intl.NumberFormat(formatter, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric) + symbol;
+                calculateTotalBalance(targetCell.parentElement);
+                saveData();
+            }
+        }
+
+        function changeYear() {
+            const year = document.getElementById('yearInput').value;
+            const input = targetCell.querySelector('.cell-input');
+            input.dataset.year = year;
+            calculateTotalBalance(targetCell.parentElement);
+            saveData();
         }
 
         function applyStyle(command) {
@@ -651,7 +721,6 @@
             if (!e.target.closest('td') && !e.target.closest('th') && !e.target.closest('#formattingToolbar') && !e.target.closest('#contextMenu') && !e.target.closest('#nameSearch') && !spacePressed) clearSelection();
         });
 
-        // Clipboard logic (Copy/Paste)
         const processClipboard = (e, isCut = false) => {
             const selected = document.querySelectorAll('.selected-cell');
             if (selected.length > 0) {
