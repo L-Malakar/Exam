@@ -6,6 +6,16 @@
       "folder": "English",
       "papers": [
         {
+            "year": 2018,
+            "qp": "exam_paper/English/2018.pdf",
+            "solved": "exam_paper/English/2018_Solved.pdf"
+        },
+        {
+            "year": 2019,
+            "qp": "exam_paper/English/2019.pdf",
+            "solved": "exam_paper/English/2019_Solved.pdf"
+        },
+        {
             "year": 2020,
             "qp": "exam_paper/English/2020.pdf",
             "solved": "exam_paper/English/2020_Solved.pdf"
@@ -16,6 +26,11 @@
             "solved": "exam_paper/English/2022_Solved.pdf"
         },
         {
+            "year": 2023,
+            "qp": "exam_paper/English/2023.pdf",
+            "solved": "exam_paper/English/2023_Solved.pdf"
+        },
+        {
             "year": 2024,
             "qp": "exam_paper/English/2024.pdf",
             "solved": "exam_paper/English/2024_Solved.pdf"
@@ -24,6 +39,11 @@
             "year": 2025,
             "qp": "exam_paper/English/2025.pdf",
             "solved": "exam_paper/English/2025_Solved.pdf"
+        },
+        {
+            "year": 2026,
+            "qp": "exam_paper/English/2026.pdf",
+            "solved": "exam_paper/English/2026_Solved.pdf"
         }
       ]
     },
