@@ -1,0 +1,83 @@
+{
+  "subjects": [
+    {
+      "slug": "english",
+      "name": "English",
+      "folder": "English",
+      "papers": [
+        {
+            "year": 2020,
+            "qp": "exam_paper/English/2020.pdf",
+            "solved": "exam_paper/English/2020_Solved.pdf"
+        },
+        {
+            "year": 2022,
+            "qp": "exam_paper/English/2022.pdf",
+            "solved": "exam_paper/English/2022_Solved.pdf"
+        },
+        {
+            "year": 2024,
+            "qp": "exam_paper/English/2024.pdf",
+            "solved": "exam_paper/English/2024_Solved.pdf"
+        },
+        {
+            "year": 2025,
+            "qp": "exam_paper/English/2025.pdf",
+            "solved": "exam_paper/English/2025_Solved.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "bengali",
+      "name": "Bengali (MIL)",
+      "folder": "Bengali",
+      "papers": [
+        {
+            "year": 2019,
+            "qp": "exam_paper/Bengali/2019.pdf",
+            "solved": "exam_paper/Bengali/2019_Solved.pdf"
+        },
+        {
+            "year": 2022,
+            "qp": "exam_paper/Bengali/2022.pdf",
+            "solved": "exam_paper/Bengali/2022_Solved.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "political-science",
+      "name": "Political Science",
+      "folder": "Political Science",
+      "papers": []
+    },
+    {
+      "slug": "logic-and-philosophy",
+      "name": "Logic and Philosophy",
+      "folder": "Logic and Philosophy",
+      "papers": []
+    },
+    {
+      "slug": "computer-science-and-application",
+      "name": "Computer Science and Application",
+      "folder": "Computer Science and Application",
+      "papers": [
+        {
+          "year": 2019,
+          "qp": "exam_paper/Computer Science and Application/2019.pdf",
+          "solved": "exam_paper/Computer Science and Application/2019_Solved.pdf"
+        },
+        {
+          "year": 2022,
+          "qp":"exam_paper/Computer Science and Application/2022.pdf",
+          "solved":"exam_paper/Computer Science and Application/2022_Solved.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "tourism-and-hospitality",
+      "name": "Tourism and Hospitality",
+      "folder": "Tourism and Hospitality",
+      "papers": []
+    }
+  ]
+}

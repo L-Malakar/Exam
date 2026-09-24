@@ -1,806 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Post - Advanced Smart Sheet</title>
-    <style>
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            background-color: #f0f2f5; 
-            user-select: none; 
-            overflow: hidden; 
-            width: 100vw;
-            height: 100vh;
-            touch-action: none; /* Prevents browser pull-to-refresh during panning */
-        }
-        
-        #viewport {
-            width: 100%;
-            height: 100%;
-            cursor: grab;
-            overflow: hidden;
-            position: relative;
-        }
-        #viewport:active { cursor: grabbing; }
-
-        #content-wrapper {
-            position: absolute;
-            transform-origin: 0 0;
-            padding: 20px; /* Reduced padding for mobile initial view */
-        }
-
-        .container { 
-            overflow: auto; 
-            border-radius: 8px; 
-            position: relative; 
-            max-width: 100vw;
-        }
-        
-        h2 { color: #1a73e8; margin-left: 20px; margin-bottom: 10px; }
-        
-        /* Search Bar Styles */
-        .search-container {
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-        #nameSearch {
-            padding: 10px 15px;
-            width: 300px;
-            max-width: 90%;
-            border: 1px solid #dadce0;
-            border-radius: 20px;
-            outline: none;
-            font-size: 16px; /* 16px prevents iOS auto-zoom on focus */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        #nameSearch:focus {
-            border-color: #1a73e8;
-            box-shadow: 0 1px 6px rgba(32,33,36,0.28);
-        }
-
-        table { border-collapse: collapse; background: white; min-width: 100%; border: 1px solid #dadce0; table-layout: auto; }
-        th, td { border: 1px solid #dadce0; padding: 0; min-width: 100px; position: relative; height: 45px; box-sizing: border-box; white-space: nowrap; }
-        
-        th { 
-            background-color: #f8f9fa; 
-            padding: 10px; 
-            font-size: 13px; 
-            color: #5f6368; 
-            text-align: left; 
-            cursor: grab; 
-            position: relative; 
-            font-weight: bold; 
-            text-decoration: underline; 
-        }
-        th:active { cursor: grabbing; }
-        
-        .cell-input { 
-            width: 100%; height: 100%; padding: 12px; border: none; outline: none; 
-            box-sizing: border-box; font-size: 14px; background: transparent;
-            min-height: 45px; display: block; overflow: hidden; 
-            white-space: nowrap; 
-        }
-        .cell-input:focus { background-color: #e8f0fe; }
-
-        .checkbox-container { display: flex; justify-content: center; align-items: center; height: 100%; position: relative; }
-        .collected-check { transform: scale(1.4); cursor: pointer; z-index: 2; }
-        
-        td:first-child .cell-input {
-            font-weight: bold;
-        }
-
-        .pencil-icon {
-            position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
-            background: #1a73e8; color: white; font-size: 12px; text-align: center;
-            line-height: 20px; border-radius: 2px; cursor: pointer; display: none; z-index: 10;
-        }
-        td.selected-cell .pencil-icon { display: block; }
-        
-        .selected-cell { background-color: rgba(26, 115, 232, 0.1) !important; outline: 1px solid #1a73e8; z-index: 5; }
-        .search-match { background-color: #fffde7 !important; outline: 2px solid #fbc02d; z-index: 6; }
-
-        .fill-handle {
-            position: absolute; width: 10px; height: 10px; background: #1a73e8;
-            border: 1px solid white; right: -5px; bottom: -5px; cursor: crosshair;
-            z-index: 20; display: none;
-        }
-        .last-selected .fill-handle { display: block; }
-
-        #contextMenu, #formattingToolbar {
-            display: none; position: absolute; background: white; border: 1px solid #ccc;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; border-radius: 4px; padding: 5px;
-        }
-        #contextMenu button, #formattingToolbar button { 
-            display: inline-block; padding: 10px 15px; border: 1px solid transparent; 
-            background: none; cursor: pointer; font-size: 14px; border-radius: 3px;
-        }
-        #contextMenu button { display: block; width: 100%; text-align: left; }
-        
-        .hint { font-size: 0.85em; color: #666; margin: 10px 20px; background: #fff; padding: 10px; border-radius: 5px; display: inline-block; border: 1px solid #ddd; }
-
-        .extra-option { margin: 5px; padding: 5px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 5px; font-size: 13px; }
-        .extra-option select, .extra-option input { padding: 3px; border: 1px solid #ddd; border-radius: 3px; }
-
-        /* Mobile Responsive Overrides */
-        @media (max-width: 768px) {
-            #content-wrapper { padding: 10px; }
-            h2 { font-size: 1.2rem; margin-left: 10px; }
-            .hint { font-size: 0.75rem; margin: 10px; }
-            .search-container { margin-left: 10px; }
-            th, td { min-width: 80px; height: 40px; }
-            #formattingToolbar button { padding: 12px; } /* Larger touch targets */
-        }
-    </style>
+<meta charset="UTF-8">
+<title>AHSEC HS 2nd Year Syllabus Guide (2026-27) — Arts Stream</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 30px 20px; color: #222; line-height: 1.6; background: #fdfdfb; }
+  h1 { color: #7a1f1f; border-bottom: 3px solid #7a1f1f; padding-bottom: 10px; }
+  h2 { color: #7a1f1f; margin-top: 40px; border-left: 5px solid #d4a017; padding-left: 12px; }
+  h3 { color: #444; margin-top: 20px; }
+  .notice { background: #fff3cd; border: 1px solid #ffe08a; padding: 15px 20px; border-radius: 6px; margin: 20px 0; }
+  .subject-box { background: #fff; border: 1px solid #e2e2e2; border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+  th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; font-size: 15px; }
+  th { background: #7a1f1f; color: #fff; }
+  tr:nth-child(even) { background: #f9f9f6; }
+  .source { font-size: 13px; color: #666; margin-top: 8px; }
+  a { color: #1a5276; }
+  .toc { background: #f4f0e8; padding: 15px 25px; border-radius: 6px; }
+  .toc a { display: block; margin: 4px 0; text-decoration: none; }
+  .badge { display: inline-block; background: #d4a017; color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+  footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 13px; color: #777; }
+  .pdf-btn { float: right; background: #d4a017; color: #fff !important; font-size: 13px; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-weight: normal; margin-top: 5px; }
+  .pdf-btn:hover { background: #b3860f; }
+  .papers-btn { float: right; background: #7a1f1f; color: #fff !important; font-size: 13px; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-weight: normal; margin-top: 5px; margin-left: 8px; }
+  .papers-btn:hover { background: #5e1717; }
+</style>
 </head>
 <body>
 
-    <div id="viewport">
-        <div id="content-wrapper">
-            <h2>Post Project</h2>
-            
-            <div class="search-container">
-                <input type="text" id="nameSearch" placeholder="🔍 Search name..." oninput="searchName()">
-            </div>
+<h1>AHSEC HS 2nd Year (Class 12) — Syllabus Reference Guide<br><small style="font-size:18px; color:#666;">Session 2026-27 | Arts Stream, Assam</small></h1>
 
-            <div class="hint">✏️ <b>Pencil:</b> Formatting | 🖱️ <b>Hold/Right Click:</b> Menu | ⌨️ <b>Enter:</b> Next</div>
+<div class="notice">
+<strong>⚠️ Important note on accuracy:</strong> The official AHSEC/ASSEB website (<a href="https://ahsec.assam.gov.in" target="_blank">ahsec.assam.gov.in</a>) blocks automated tools from directly reading its syllabus PDFs, so I could not extract the exact unit-by-unit text for every one of your subjects. What's below is compiled from AHSEC's own official syllabus page structure, education-news sites that mirror the official PDFs, and confirmed AHSEC exam-paper patterns — all sourced below each subject. <strong>For the exact chapter-by-chapter PDF (which is what your school will follow), please download directly from the official site using the links given for each subject.</strong> Also note: the board that runs AHSEC is now called <strong>ASSEB (Assam State School Education Board) — Division II</strong>, formed by merging SEBA and AHSEC in 2024; "AHSEC" and "HS 2nd Year" are still the terms used in daily use.
+</div>
 
-            <div class="container">
-                <table id="postTable">
-                    <thead><tr id="headerRow"></tr></thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+<div class="toc">
+<strong>Your 6 Subjects</strong> <span style="font-size:12px; color:#888;">(click a subject to jump to its syllabus notes below, or use the "📝 Question Papers" button on each subject for past papers)</span>
+<a href="#english">1. English</a>
+<a href="#bengali">2. Bengali (MIL)</a>
+<a href="#polsci">3. Political Science</a>
+<a href="#logic">4. Logic & Philosophy</a>
+<a href="#compsci">5. Computer Science & Application</a>
+<a href="#tourism">6. Tourism and Hospitality</a>
+</div>
 
-    <div id="formattingToolbar">
-        <div id="standard-tools">
-            <button id="btn-bold" onclick="applyStyle('bold')"><b>B</b></button>
-            <button id="btn-italic" onclick="applyStyle('italic')"><i>I</i></button>
-            <button id="btn-underline" onclick="applyStyle('underline')"><u>U</u></button>
-            <button onclick="applyStyle('justifyLeft')">L</button>
-            <button onclick="applyStyle('justifyCenter')">C</button>
-            <button onclick="applyStyle('justifyRight')">R</button>
-        </div>
-        
-        <div id="currency-option" class="extra-option" style="display:none;">
-            <span>Currency:</span>
-            <select id="currencySelect" onchange="changeCurrency()">
-                <option value="₹">₹ (INR)</option>
-                <option value="$">$ (USD)</option>
-                <option value="€">€ (EUR)</option>
-                <option value="£">£ (GBP)</option>
-                <option value="¥">¥ (JPY)</option>
-            </select>
-        </div>
+<h2 id="general">General AHSEC Exam Pattern (applies to all subjects below)</h2>
+<div class="subject-box">
+<ul>
+<li>Each subject paper is generally worth <strong>100 marks</strong>, 3-hour duration.</li>
+<li>Question papers have 4 sections: Objective (MCQ), Very Short Answer, Short Answer, Long Answer.</li>
+<li>Minimum passing marks: <strong>30%</strong> per subject (for subjects with practicals: 30% in theory <em>and</em> 40% in practical, both must be cleared separately).</li>
+<li>You must study 2 compulsory language papers (English + a MIL, e.g. Bengali) and 3-4 electives — you have English + Bengali as your two languages, and Political Science, Logic, Computer Science, Tourism & Hospitality as your four electives.</li>
+</ul>
+<p class="source">Source: <a href="https://eduaid.co.in/ahsec-syllabus/" target="_blank">eduaid.co.in – AHSEC syllabus overview</a>; <a href="https://www.collegedekho.com/assam-12th-syllabus-brd" target="_blank">CollegeDekho – AHSEC pattern</a></p>
+</div>
 
-        <div id="year-option" class="extra-option" style="display:none;">
-            <span>Year:</span>
-            <input type="number" id="yearInput" value="2026" style="width: 60px;" oninput="changeYear()">
-        </div>
-    </div>
+<h2 id="english">1. English <a class="papers-btn" href="subject.html?subject=english">📝 Question Papers</a><a class="pdf-btn" href="https://ahsec.assam.gov.in/wp-content/uploads/2022/03/2-English-Core.pdf" target="_blank" rel="noopener">📄 Open Official PDF</a></h2>
+<div class="subject-box">
+<p>AHSEC Class 12 English is assessed across four broad areas:</p>
+<table>
+<tr><th>Section</th><th>Typical Content</th></tr>
+<tr><td>Reading</td><td>Unseen prose/poetry passages, comprehension</td></tr>
+<tr><td>Writing</td><td>Letter writing, report writing, applications, articles, speeches</td></tr>
+<tr><td>Grammar</td><td>Tenses, transformation, error correction, vocabulary</td></tr>
+<tr><td>Literature</td><td>Prescribed prose, poetry, and short-story texts from the AHSEC textbook</td></tr>
+</table>
+<p class="source">Source: <a href="https://www.selfstudys.com/books/assam/state-books/class-12th/syllabus/13937" target="_blank">Selfstudys – AHSEC Syllabus 2025-26</a>; letter/report/application writing formats confirmed via <a href="https://www.mantunotes.com/2026/05/AHSEC%20CLASS%2012%20ENGLISH%20SOLVED%20PAPER%20-%202026%20ASSEB%20BOARD.html" target="_blank">Mantu Notes – 2026 AHSEC English solved paper</a></p>
+<p><strong>👉 For the exact prescribed prose/poetry chapters:</strong> download the official PDF from <a href="https://ahsec.assam.gov.in/index.php/hs-2nd-year-syllabus-25-26/" target="_blank">ahsec.assam.gov.in → HS 2nd Year Syllabus</a> (English).</p>
+</div>
 
-    <div id="contextMenu">
-        <button onclick="deleteSelectedCellsContent()" style="color:blue; font-weight:bold;">Delete Content</button>
-        <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
-        <button onclick="addRowAt()">Insert Row Below</button>
-        <button onclick="deleteRowAt()" style="color:red;">Delete Row</button>
-        <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
-        <button onclick="addColumnAt()">Insert Col Right</button>
-        <button onclick="deleteColumnAt()" style="color:red;">Delete Col</button>
-    </div>
+<h2 id="bengali">2. Bengali (Modern Indian Language / MIL) <a class="papers-btn" href="subject.html?subject=bengali">📝 Question Papers</a><a class="pdf-btn" href="https://ahsec.assam.gov.in/wp-content/uploads/2022/03/2-Bengali-MIL.pdf" target="_blank" rel="noopener">📄 Open Official PDF</a></h2>
+<div class="subject-box">
+<p>Bengali is offered as an MIL (Modern Indian Language) paper option under AHSEC — confirmed as an active, currently listed subject for HS 2nd Year 2026-27 on the official AHSEC syllabus index.</p>
+<p>Typically the MIL Bengali paper includes: prose & poetry from prescribed Bengali literature texts, grammar (ব্যাকরণ), translation exercises, and composition/letter-writing in Bengali.</p>
+<p class="source">Source: subject listed under "NEW SYLLABUS – 2026-27" on <a href="https://www.mantunotes.com/p/ahsec-class-12-hs-2nd-year-question.html" target="_blank">Mantu Notes – AHSEC Class 12 Arts Stream index</a> (mirrors official AHSEC subject list); general MIL structure from <a href="https://ahsec.assam.gov.in/index.php/hs-2nd-year-syllabus/" target="_blank">AHSEC official syllabus page</a>.</p>
+<p><strong>👉 Exact chapter list:</strong> Since Bengali-medium literature content changes with each textbook revision, please confirm the exact prescribed texts with your school/college — the detailed PDF is on the official AHSEC site under "(MIL) Bengali."</p>
+</div>
 
-    <script>
-        let targetCell = null;
-        let isMouseDown = false;
-        let startCell = null;
-        let draggedColIdx = null;
+<h2 id="polsci">3. Political Science <a class="papers-btn" href="subject.html?subject=political-science">📝 Question Papers</a><a class="pdf-btn" href="https://ahsec.assam.gov.in/wp-content/uploads/2022/03/Political-Science.pdf" target="_blank" rel="noopener">📄 Open Official PDF</a></h2>
+<div class="subject-box">
+<p>AHSEC Political Science covers a mix of Indian politics and international relations. Confirmed topics/chapters (from official syllabus summaries and 2025-26 board question papers) include:</p>
+<table>
+<tr><th>Topic Area</th><th>Key Chapters</th></tr>
+<tr><td>International Relations</td><td>Contemporary South Asia, Era of One-Party Dominance, Security in the Contemporary World, Balance of Power, United Nations & its agencies, European Union, SAARC/SAFTA</td></tr>
+<tr><td>Indian Politics</td><td>The Crisis of Democratic Order, State Reorganisation, India's Foreign Policy (Non-Alignment), Coalition politics (NDA/UPA), India–Nepal & neighbourhood relations</td></tr>
+<tr><td>Constitutional</td><td>Making & adoption of the Indian Constitution</td></tr>
+</table>
+<p class="source">Source: <a href="https://www.selfstudys.com/books/assam/state-books/class-12th/syllabus/13937" target="_blank">Selfstudys – AHSEC Syllabus chapters list</a>; chapter names cross-verified against <a href="https://www.thetreasurenotes.in/2025/07/ahsec-class-12-political-science-solved-2025.html" target="_blank">The Treasure Notes – AHSEC Class 12 Political Science Solved Paper 2025</a> (actual board exam content)</p>
+<p><strong>👉 Exact unit-wise marks:</strong> download from official AHSEC site — link above.</p>
+</div>
 
-        let scale = 1, posX = 0, posY = 0, isPanning = false, spacePressed = false;
-        const viewport = document.getElementById('viewport');
-        const wrapper = document.getElementById('content-wrapper');
+<h2 id="logic">4. Logic and Philosophy <a class="papers-btn" href="subject.html?subject=logic-and-philosophy">📝 Question Papers</a><a class="pdf-btn" href="https://ahsec.assam.gov.in/wp-content/uploads/2024/07/2-Logic-and-philosophy-1-1_ff-1.pdf" target="_blank" rel="noopener">📄 Open Official PDF</a></h2>
+<div class="subject-box">
+<p>Logic and Philosophy is a distinct AHSEC elective (not to be confused with CBSE's Psychology). It is confirmed as a current subject offering for HS 2nd year, generally covering the <strong>scope and nature of logic</strong>, deductive & inductive reasoning, syllogisms, fallacies, and philosophical concepts.</p>
+<p class="source">Source: <a href="https://www.selfstudys.com/books/assam/state-books/class-12th/syllabus/13937" target="_blank">Selfstudys – AHSEC Syllabus</a> ("Logic and Philosophy is the study where you can understand the scope as well as the nature of logic"); subject confirmed active in <a href="https://www.assamboard.com/assam-board-class-12.html" target="_blank">Assamboard.com – Class 12 subject list (LOPH code)</a></p>
+<p><strong>👉 Exact chapter list:</strong> I was not able to retrieve the full unit breakdown for Logic & Philosophy — this subject has less coverage on secondary sites than others. Please get this directly from your school or the official AHSEC PDF titled "LOGIC & PHILOSOPHY" at <a href="https://ahsec.assam.gov.in/index.php/hs-2nd-year-syllabus-25-26/" target="_blank">ahsec.assam.gov.in</a>.</p>
+</div>
 
-        const defaultHeaders = ["No.", "Name", "A/c No", "Amount", "Date of Opening", "Month", "Collected", "Total Balance"];
-        const defaultRows = [["1", "", "", "", "dd/mm/yyyy", "", "false", ""]];
+<h2 id="compsci">5. Computer Science and Application <a class="papers-btn" href="subject.html?subject=computer-science-and-application">📝 Question Papers</a><a class="pdf-btn" href="https://ahsec.assam.gov.in/wp-content/uploads/2022/03/Computer-Science-Application-1.pdf" target="_blank" rel="noopener">📄 Open Official PDF</a></h2>
+<div class="subject-box">
+<p>Based on actual 2025 AHSEC board exam question content, AHSEC's Computer Science and Application (code CSCA) paper focuses on <strong>Object-Oriented Programming (OOP) concepts</strong> — this is different from CBSE's Python-only syllabus, so be careful not to mix the two up. Confirmed topics from a real AHSEC solved paper:</p>
+<table>
+<tr><th>Topic</th><th>Concepts</th></tr>
+<tr><td>OOP Fundamentals</td><td>Classes, Objects, Instances</td></tr>
+<tr><td>Core OOP Principles</td><td>Data Encapsulation, Function/Operator Overloading</td></tr>
+<tr><td>Object Lifecycle</td><td>Constructors, Destructors</td></tr>
+</table>
+<p>Likely additional areas (based on typical AHSEC CSCA structure, to be confirmed against the official PDF): inheritance, polymorphism, data structures, basics of databases, and computer networks.</p>
+<p class="source">Source: <a href="https://www.thetreasurenotes.in/2026/02/asseb-class-12-computer-science-application-2025-question-paper-solution.html" target="_blank">The Treasure Notes – ASSEB/AHSEC Class 12 Computer Science Solved Paper (2025, published Feb 2026)</a> — this is real board-exam content</p>
+<p><strong>👉 Exact unit list:</strong> please verify with your teacher/the official "COMPUTER-SCIENCE-AND-APPLICATION" PDF on the AHSEC site, since I could not confirm whether the language taught is C++ or another language.</p>
+</div>
 
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+<h2 id="tourism">6. Tourism and Hospitality <a class="papers-btn" href="subject.html?subject=tourism-and-hospitality">📝 Question Papers</a><a class="pdf-btn" href="https://ahsec.assam.gov.in/index.php/hs-2nd-year-syllabus-25-26/" target="_blank" rel="noopener">📄 Official Syllabus Page</a></h2>
+<div class="subject-box">
+<p>Tourism and Hospitality is confirmed as an active AHSEC subject for HS 2nd Year 2026-27 (listed both as a general elective and as a Skilled/NSQF vocational subject option in the official AHSEC structure).</p>
+<p class="source">Source: subject confirmed listed on official <a href="https://ahsec.assam.gov.in/index.php/hs-2nd-year-syllabus/" target="_blank">AHSEC HS 2nd Year Syllabus page</a> and in the "NEW SYLLABUS – 2026-27" list on <a href="https://www.mantunotes.com/p/ahsec-class-12-hs-2nd-year-question.html" target="_blank">Mantu Notes</a></p>
+<p><strong>👉 Exact chapter list:</strong> I could not find a reliable secondary-source breakdown of this subject's unit content — vocational/skill subjects are less mirrored online than the core academic ones. Please download the "TOURISM AND HOSPITALITY" PDF directly from the official AHSEC site, or check with your school (this subject may follow the NSQF vocational curriculum, which typically covers tourism industry basics, hospitality operations, front office & housekeeping, and travel management).</p>
+</div>
 
-        window.onload = loadData;
+<h2>📥 How to Get the Exact Official PDFs Yourself</h2>
+<div class="subject-box">
+<ol>
+<li>Go to <a href="https://ahsec.assam.gov.in/index.php/hs-2nd-year-syllabus-25-26/" target="_blank">ahsec.assam.gov.in → HS 2nd Year Syllabus</a></li>
+<li>Find your subject name in the list (English, Bengali (MIL), Political Science, Logic & Philosophy, Computer Science & Application, Tourism and Hospitality)</li>
+<li>Click to download the subject-wise PDF — these give the exact unit names, chapter-wise marks, and time allotment set by the board</li>
+</ol>
+<p>Since this website blocks automated browsing tools, I couldn't fetch these files for you directly — but a normal browser on your phone/PC will open them fine.</p>
+</div>
 
-        // Mouse Wheel Zoom
-        viewport.onwheel = (e) => {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? -0.1 : 0.1;
-            const newScale = Math.min(Math.max(0.2, scale + delta), 3);
-            const rect = wrapper.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
-            posX -= mouseX * (newScale / scale - 1);
-            posY -= mouseY * (newScale / scale - 1);
-            scale = newScale;
-            updateTransform();
-        };
+<footer>
+Compiled on 1 July 2026 using web search of AHSEC/ASSEB official pages and verified secondary sources (Selfstudys, CollegeDekho, Mantu Notes, The Treasure Notes, Assamboard.com, EduAid). Cross-check details with your school/college before finalising your study plan, as boards occasionally revise syllabi mid-session.
+</footer>
 
-        // Keyboard support
-        window.onkeydown = (e) => { if(e.code === 'Space') spacePressed = true; };
-        window.onkeyup = (e) => { if(e.code === 'Space') spacePressed = false; };
-
-        // Desktop Panning
-        viewport.onmousedown = (e) => { if (spacePressed || e.button === 1) isPanning = true; };
-        window.onmousemove = (e) => { if (isPanning) { posX += e.movementX; posY += e.movementY; updateTransform(); } };
-        window.onmouseup = () => { isPanning = false; isMouseDown = false; };
-
-        // Mobile Touch Panning & Pinch Zoom
-        let lastTouchX = 0, lastTouchY = 0;
-        let initialPinchDistance = 0;
-        let initialScale = 1;
-
-        viewport.ontouchstart = (e) => {
-            if (e.touches.length === 1 && !e.target.closest('.cell-input')) {
-                isPanning = true;
-                lastTouchX = e.touches[0].clientX;
-                lastTouchY = e.touches[0].clientY;
-            } else if (e.touches.length === 2) {
-                isPanning = false;
-                initialPinchDistance = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
-                initialScale = scale;
-            }
-        };
-
-        viewport.ontouchmove = (e) => {
-            if (e.touches.length === 1 && isPanning) {
-                const touch = e.touches[0];
-                posX += (touch.clientX - lastTouchX);
-                posY += (touch.clientY - lastTouchY);
-                lastTouchX = touch.clientX;
-                lastTouchY = touch.clientY;
-                updateTransform();
-            } else if (e.touches.length === 2) {
-                const currentDistance = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
-                const zoomFactor = currentDistance / initialPinchDistance;
-                const newScale = Math.min(Math.max(0.2, initialScale * zoomFactor), 3);
-                
-                const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-                const rect = wrapper.getBoundingClientRect();
-                const offsetX = centerX - rect.left, offsetY = centerY - rect.top;
-                
-                posX -= offsetX * (newScale / scale - 1);
-                posY -= offsetY * (newScale / scale - 1);
-                
-                scale = newScale;
-                updateTransform();
-            }
-        };
-
-        viewport.ontouchend = () => { 
-            isPanning = false; 
-            initialPinchDistance = 0;
-        };
-
-        function updateTransform() { wrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`; }
-
-        function updateRowNumbers() {
-            const rows = document.getElementById("tableBody").rows;
-            for (let i = 0; i < rows.length; i++) {
-                const noCell = rows[i].cells[0].querySelector('.cell-input');
-                if(noCell) noCell.innerText = i + 1;
-            }
-        }
-
-        function searchName() {
-            const query = document.getElementById("nameSearch").value.toLowerCase().trim();
-            const rows = document.getElementById("tableBody").rows;
-            document.querySelectorAll('.search-match').forEach(el => el.classList.remove('search-match'));
-            if (query === "") return;
-            const headers = Array.from(document.querySelectorAll("#headerRow th"));
-            const nameColIdx = headers.findIndex(th => th.innerText.includes("Name"));
-            if (nameColIdx === -1) return;
-
-            for (let i = 0; i < rows.length; i++) {
-                const nameCell = rows[i].cells[nameColIdx];
-                const nameInput = nameCell.querySelector('.cell-input');
-                const nameText = nameInput ? nameInput.innerText.toLowerCase() : "";
-                if (nameText.includes(query)) {
-                    Array.from(rows[i].cells).forEach(cell => cell.classList.add('search-match'));
-                    const rect = rows[i].getBoundingClientRect();
-                    posY -= (rect.top - 200); 
-                    updateTransform();
-                    break;
-                }
-            }
-        }
-
-        function calculateTotalBalance(row) {
-            const cells = row.cells;
-            const amountInput = cells[3].querySelector('.cell-input');
-            const dateInput = cells[4].querySelector('.cell-input');
-            const monthInput = cells[5].querySelector('.cell-input');
-            const collectedCheck = cells[6].querySelector('.collected-check');
-            const totalBalanceInput = cells[7].querySelector('.cell-input');
-
-            if (!amountInput || !dateInput || !monthInput || !totalBalanceInput || !collectedCheck) return;
-
-            let amountText = amountInput.innerText;
-            let amount = parseFloat(amountText.replace(/[^0-9.]/g, ''));
-            let symbol = amountText.replace(/[0-9.,\s]/g, '') || "₹";
-            
-            let dateText = dateInput.innerText.trim();
-            let selectedMonthName = monthInput.innerText.trim();
-            let selectedYear = parseInt(monthInput.dataset.year) || 2026;
-            let isCollected = collectedCheck.checked;
-
-            if (!isNaN(amount) && dateText.includes('/') && dateText !== "dd/mm/yyyy" && selectedMonthName) {
-                const parts = dateText.split('/');
-                const openingDate = new Date(parts[2], parts[1] - 1, parts[0]);
-                const targetMonthIdx = monthNames.findIndex(m => m.toLowerCase() === selectedMonthName.toLowerCase());
-                
-                if (!isNaN(openingDate) && targetMonthIdx !== -1) {
-                    const targetDate = new Date(selectedYear, targetMonthIdx, 1);
-                    let monthsDiff = (targetDate.getFullYear() - openingDate.getFullYear()) * 12 + (targetDate.getMonth() - openingDate.getMonth()) + 1;
-                    if (!isCollected) monthsDiff -= 1;
-                    if (monthsDiff < 0) monthsDiff = 0;
-                    const total = amount * monthsDiff;
-                    
-                    let formatter = (symbol === '₹') ? 'en-IN' : 'en-US';
-                    totalBalanceInput.innerText = new Intl.NumberFormat(formatter, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    }).format(total) + symbol;
-                }
-            }
-        }
-
-        function saveData() {
-            const headers = Array.from(document.querySelectorAll("#headerRow th")).map(th => th.innerText);
-            const rows = Array.from(document.querySelectorAll("#tableBody tr")).map(tr => {
-                return Array.from(tr.cells).map(td => {
-                    const input = td.querySelector('.cell-input');
-                    const checkbox = td.querySelector('.collected-check');
-                    if(checkbox) return checkbox.checked.toString();
-                    if(input && input.dataset.year) return input.innerHTML + "||year:" + input.dataset.year;
-                    return input ? input.innerHTML : "";
-                });
-            });
-            localStorage.setItem('postDataHeaders', JSON.stringify(headers));
-            localStorage.setItem('postDataRows', JSON.stringify(rows));
-        }
-
-        function loadData() {
-            const savedHeaders = JSON.parse(localStorage.getItem('postDataHeaders')) || defaultHeaders;
-            const savedRows = JSON.parse(localStorage.getItem('postDataRows')) || defaultRows;
-            const headerRow = document.getElementById("headerRow");
-            headerRow.innerHTML = "";
-            savedHeaders.forEach(text => headerRow.appendChild(createHeader(text)));
-            const tableBody = document.getElementById("tableBody");
-            tableBody.innerHTML = "";
-            savedRows.forEach((rowData, index) => {
-                const row = tableBody.insertRow();
-                rowData.forEach((cellData, colIndex) => {
-                    let val = (colIndex === 0) ? (index + 1).toString() : cellData;
-                    createCell(row, val, -1, savedHeaders[colIndex]);
-                });
-            });
-            updateTransform();
-        }
-
-        function createHeader(text) {
-            const th = document.createElement("th");
-            th.innerText = text;
-            th.draggable = true;
-            th.ondblclick = () => editHeader(th);
-            th.onmousedown = (e) => { if(!spacePressed) selectColumn(th.cellIndex); };
-            th.ondragstart = (e) => { draggedColIdx = th.cellIndex; e.dataTransfer.setData("text/plain", draggedColIdx); };
-            th.ondragover = (e) => { e.preventDefault(); th.classList.add('drag-over'); };
-            th.ondragleave = () => th.classList.remove('drag-over');
-            th.ondrop = (e) => {
-                e.preventDefault();
-                th.classList.remove('drag-over');
-                const targetIdx = th.cellIndex;
-                if (draggedColIdx !== null && draggedColIdx !== targetIdx) moveColumn(draggedColIdx, targetIdx);
-            };
-            return th;
-        }
-
-        function selectColumn(colIdx) {
-            clearSelection();
-            const table = document.getElementById("postTable");
-            for (let i = 1; i < table.rows.length; i++) {
-                const cell = table.rows[i].cells[colIdx];
-                cell.classList.add("selected-cell");
-                if (i === table.rows.length - 1) cell.classList.add("last-selected");
-            }
-            targetCell = table.rows[1].cells[colIdx];
-        }
-
-        function moveColumn(fromIdx, toIdx) {
-            const table = document.getElementById("postTable");
-            Array.from(table.rows).forEach(row => {
-                const cells = Array.from(row.cells);
-                if (toIdx >= cells.length) row.appendChild(cells[fromIdx]);
-                else row.insertBefore(cells[fromIdx], cells[toIdx]);
-            });
-            updateRowNumbers();
-            saveData();
-        }
-
-        function editHeader(th) {
-            const newName = prompt("Rename Header:", th.innerText);
-            if(newName) { th.innerText = newName; saveData(); }
-        }
-
-        function createCell(row, value = "", index = -1, headerName = "") {
-            const cell = index === -1 ? row.insertCell() : row.insertCell(index);
-            const colIndex = index === -1 ? cell.cellIndex : index;
-            const currentHeader = headerName || document.getElementById("headerRow").cells[colIndex]?.innerText;
-
-            const pencil = document.createElement("div");
-            pencil.className = "pencil-icon";
-            pencil.innerHTML = "✎";
-            pencil.onclick = (e) => { e.stopPropagation(); showToolbar(e, cell); };
-            
-            const dot = document.createElement("div");
-            dot.className = "fill-handle";
-
-            cell.appendChild(pencil);
-            cell.appendChild(dot);
-
-            if (currentHeader === "Collected") {
-                const div = document.createElement("div");
-                div.className = "checkbox-container";
-                const check = document.createElement("input");
-                check.type = "checkbox";
-                check.className = "collected-check";
-                check.checked = (value === "true");
-                const textInput = document.createElement("div");
-                textInput.className = "cell-input";
-                textInput.contentEditable = "true";
-                textInput.style.position = "absolute";
-                textInput.style.opacity = "0"; 
-                textInput.oninput = () => {
-                    let val = textInput.innerText.trim().toLowerCase();
-                    if (val === "y" || val === "yes") { check.checked = true; textInput.innerText = ""; } 
-                    else if (val === "n" || val === "no") { check.checked = false; textInput.innerText = ""; }
-                    calculateTotalBalance(row);
-                    saveData();
-                };
-                check.onchange = () => { calculateTotalBalance(row); saveData(); };
-                div.appendChild(check);
-                div.appendChild(textInput);
-                cell.appendChild(div);
-            } else {
-                const input = document.createElement("div");
-                input.className = "cell-input";
-                input.contentEditable = (currentHeader === "Total Balance") ? "false" : "true";
-                input.inputMode = (currentHeader === "Amount" || currentHeader === "A/c No") ? "decimal" : "text";
-
-                let displayValue = value;
-                if (value.includes("||year:")) {
-                    let parts = value.split("||year:");
-                    displayValue = parts[0];
-                    input.dataset.year = parts[1];
-                } else if (currentHeader === "Month") {
-                    input.dataset.year = "2026";
-                }
-
-                if (currentHeader === "Date of Opening") {
-                    if (displayValue === "" || displayValue === "dd/mm/yyyy") {
-                        input.innerHTML = "dd/mm/yyyy";
-                        input.classList.add("placeholder-text");
-                    } else { input.innerHTML = displayValue; }
-                } else { input.innerHTML = displayValue; }
-
-                if (currentHeader === "Amount") {
-                    input.oninput = (e) => {
-                        const filtered = input.innerText.replace(/[^0-9.₹$€£¥]/g, '');
-                        if (input.innerText !== filtered) input.innerText = filtered;
-                        calculateTotalBalance(row);
-                        saveData();
-                    };
-                    input.onblur = () => {
-                        let text = input.innerText;
-                        let numeric = text.replace(/[^0-9.]/g, '');
-                        let symbol = text.replace(/[0-9.]/g, '') || "₹";
-                        if (numeric && !isNaN(numeric)) {
-                            let formatter = (symbol === '₹') ? 'en-IN' : 'en-US';
-                            input.innerText = new Intl.NumberFormat(formatter, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric) + symbol;
-                        }
-                        calculateTotalBalance(row);
-                        saveData();
-                    };
-                }
-
-                if (currentHeader === "Date of Opening") {
-                    const datePicker = document.createElement("input");
-                    datePicker.type = "date";
-                    datePicker.className = "date-picker-hidden";
-                    datePicker.style.display = "none";
-                    cell.appendChild(datePicker);
-                    input.onfocus = () => { if (input.innerText === "dd/mm/yyyy") { input.innerText = ""; input.classList.remove("placeholder-text"); } };
-                    input.onblur = () => { if (input.innerText.trim() === "") { input.innerText = "dd/mm/yyyy"; input.classList.add("placeholder-text"); } };
-                    input.onclick = () => { if(input.innerText.trim() === "" || input.innerText === "dd/mm/yyyy") datePicker.showPicker(); };
-                    datePicker.onchange = () => {
-                        const d = new Date(datePicker.value);
-                        if(!isNaN(d)) {
-                            input.innerText = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-                            input.classList.remove("placeholder-text");
-                            calculateTotalBalance(row);
-                            saveData();
-                        }
-                    };
-                }
-
-                if (currentHeader === "Month") {
-                    input.onblur = () => {
-                        let val = input.innerText.trim().toLowerCase();
-                        let found = monthNames.find(m => m.toLowerCase().startsWith(val));
-                        if(found && val !== "") input.innerText = found;
-                        else if (val !== "" && !monthNames.map(m => m.toLowerCase()).includes(val)) input.innerText = ""; 
-                        calculateTotalBalance(row);
-                        saveData();
-                    };
-                }
-
-                input.onkeydown = (e) => {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        const body = document.getElementById("tableBody");
-                        if (currentHeader === "Month") {
-                            const newRow = body.insertRow();
-                            const headers = Array.from(document.querySelectorAll("#headerRow th"));
-                            headers.forEach((th, i) => {
-                                let initialVal = (i === 0) ? (body.rows.length).toString() : (th.innerText === "Collected" ? "false" : (th.innerText === "Date of Opening" ? "dd/mm/yyyy" : ""));
-                                createCell(newRow, initialVal, -1, th.innerText);
-                            });
-                            saveData();
-                            newRow.cells[1].querySelector('.cell-input').focus();
-                            return;
-                        }
-                        const table = document.getElementById("postTable");
-                        let foundEmpty = false;
-                        for (let c = cell.cellIndex; c < table.rows[0].cells.length; c++) {
-                            let startR = (c === cell.cellIndex) ? cell.parentElement.rowIndex + 1 : 1;
-                            for (let r = startR; r < table.rows.length; r++) {
-                                let checkInput = table.rows[r].cells[c].querySelector('.cell-input');
-                                if (checkInput && (checkInput.innerText.trim() === "" || checkInput.innerText === "dd/mm/yyyy")) {
-                                    checkInput.focus();
-                                    foundEmpty = true;
-                                    break;
-                                }
-                            }
-                            if (foundEmpty) break;
-                        }
-                        if (!foundEmpty) {
-                            const newRow = body.insertRow();
-                            const headers = Array.from(document.querySelectorAll("#headerRow th"));
-                            headers.forEach((th, i) => {
-                                let initialVal = (i === 0) ? (body.rows.length).toString() : (th.innerText === "Collected" ? "false" : (th.innerText === "Date of Opening" ? "dd/mm/yyyy" : ""));
-                                createCell(newRow, initialVal, -1, th.innerText);
-                            });
-                            saveData();
-                            newRow.cells[1].querySelector('.cell-input').focus();
-                        }
-                    }
-                };
-                input.oninput = input.oninput || (() => saveData());
-                cell.appendChild(input);
-            }
-
-            cell.onmousedown = (e) => {
-                if(e.target.className === 'pencil-icon' || spacePressed) return;
-                isMouseDown = true;
-                startCell = cell;
-                selectRange(startCell, cell);
-            };
-            cell.onmouseenter = () => { if (isMouseDown) selectRange(startCell, cell); };
-            cell.oncontextmenu = (e) => showMenu(e, cell);
-            return cell;
-        }
-
-        function selectRange(start, end) {
-            clearSelection();
-            const table = document.getElementById("postTable");
-            const x1 = start.cellIndex, y1 = start.parentElement.rowIndex - 1;
-            const x2 = end.cellIndex, y2 = end.parentElement.rowIndex - 1;
-            const minX = Math.min(x1, x2), maxX = Math.max(x1, x2);
-            const minY = Math.min(y1, y2), maxY = Math.max(y1, y2);
-            for (let y = minY; y <= maxY; y++) {
-                for (let x = minX; x <= maxX; x++) {
-                    const c = table.rows[y + 1].cells[x];
-                    c.classList.add("selected-cell");
-                    if (y === maxY && x === maxX) c.classList.add("last-selected");
-                }
-            }
-            targetCell = end;
-        }
-
-        function clearSelection() {
-            document.querySelectorAll('.selected-cell').forEach(c => c.classList.remove('selected-cell', 'last-selected'));
-            document.querySelectorAll('.search-match').forEach(c => c.classList.remove('search-match'));
-        }
-
-        function deleteSelectedCellsContent() {
-            const selected = document.querySelectorAll('.selected-cell');
-            selected.forEach(cell => {
-                if (cell.cellIndex !== 0) {
-                    const input = cell.querySelector('.cell-input');
-                    const check = cell.querySelector('.collected-check');
-                    if(input) {
-                        input.innerHTML = (document.getElementById("headerRow").cells[cell.cellIndex]?.innerText === "Date of Opening") ? "dd/mm/yyyy" : "";
-                        if(input.innerHTML === "dd/mm/yyyy") input.classList.add("placeholder-text");
-                        input.style.fontWeight = "normal"; input.style.textDecoration = "none"; input.style.fontStyle = "normal"; input.style.textAlign = "left";
-                    }
-                    if(check) { check.checked = false; calculateTotalBalance(cell.parentElement); }
-                }
-            });
-            saveData();
-            document.getElementById("contextMenu").style.display = "none";
-        }
-
-        function showToolbar(e, cell) {
-            const toolbar = document.getElementById("formattingToolbar");
-            const input = cell.querySelector('.cell-input');
-            if(!input) return;
-            
-            targetCell = cell;
-            const headerText = document.getElementById("headerRow").cells[cell.cellIndex].innerText;
-            
-            document.getElementById('currency-option').style.display = (headerText === "Amount") ? "flex" : "none";
-            document.getElementById('year-option').style.display = (headerText === "Month") ? "flex" : "none";
-            
-            if (headerText === "Amount") {
-                const currentSym = input.innerText.replace(/[0-9.,\s]/g, '') || "₹";
-                document.getElementById('currencySelect').value = currentSym;
-            }
-            if (headerText === "Month") {
-                document.getElementById('yearInput').value = input.dataset.year || "2026";
-            }
-
-            toolbar.style.display = "block";
-            const rect = cell.getBoundingClientRect();
-            toolbar.style.left = Math.min(rect.left, window.innerWidth - 220) + "px";
-            toolbar.style.top = (rect.top - 100) + "px";
-            input.focus();
-        }
-
-        function changeCurrency() {
-            const symbol = document.getElementById('currencySelect').value;
-            const input = targetCell.querySelector('.cell-input');
-            let numeric = input.innerText.replace(/[^0-9.]/g, '');
-            if (numeric) {
-                let formatter = (symbol === '₹') ? 'en-IN' : 'en-US';
-                input.innerText = new Intl.NumberFormat(formatter, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric) + symbol;
-                calculateTotalBalance(targetCell.parentElement);
-                saveData();
-            }
-        }
-
-        function changeYear() {
-            const year = document.getElementById('yearInput').value;
-            const input = targetCell.querySelector('.cell-input');
-            input.dataset.year = year;
-            calculateTotalBalance(targetCell.parentElement);
-            saveData();
-        }
-
-        function applyStyle(command) {
-            const selected = document.querySelectorAll('.selected-cell');
-            if (selected.length > 0) {
-                selected.forEach(cell => {
-                    const input = cell.querySelector('.cell-input');
-                    if(input){
-                        input.focus();
-                        document.execCommand('selectAll', false, null);
-                        document.execCommand(command, false, null);
-                        window.getSelection().removeAllRanges();
-                    }
-                });
-            } else { document.execCommand(command, false, null); }
-            saveData();
-        }
-
-        function showMenu(e, cell) {
-            e.preventDefault();
-            targetCell = cell;
-            const menu = document.getElementById("contextMenu");
-            menu.style.display = "block";
-            menu.style.left = Math.min(e.pageX, window.innerWidth - 150) + "px";
-            menu.style.top = Math.min(e.pageY, window.innerHeight - 200) + "px";
-        }
-
-        document.addEventListener("mousedown", (e) => {
-            if (!e.target.closest('#formattingToolbar') && !e.target.closest('.pencil-icon')) document.getElementById("formattingToolbar").style.display = "none";
-            if (!e.target.closest('#contextMenu')) document.getElementById("contextMenu").style.display = "none";
-            if (!e.target.closest('td') && !e.target.closest('th') && !e.target.closest('#formattingToolbar') && !e.target.closest('#contextMenu') && !e.target.closest('#nameSearch') && !spacePressed) clearSelection();
-        });
-
-        const processClipboard = (e, isCut = false) => {
-            const selected = document.querySelectorAll('.selected-cell');
-            if (selected.length > 0) {
-                e.preventDefault();
-                let textData = "";
-                const table = document.getElementById("postTable");
-                let minR = 9999, maxR = 0, minC = 9999, maxC = 0;
-                selected.forEach(c => {
-                    const r = c.parentElement.rowIndex, col = c.cellIndex;
-                    minR = Math.min(minR, r); maxR = Math.max(maxR, r);
-                    minC = Math.min(minC, col); maxC = Math.max(maxC, col);
-                });
-                for (let i = minR; i <= maxR; i++) {
-                    let rowData = [];
-                    for (let j = minC; j <= maxC; j++) {
-                        const cell = table.rows[i].cells[j];
-                        const cellInput = cell.querySelector('.cell-input');
-                        const check = cell.querySelector('.collected-check');
-                        let val = check ? (check.checked ? "YES" : "NO") : (cellInput ? cellInput.innerText : "");
-                        rowData.push(val);
-                        if(isCut && j !== 0 && cellInput) cellInput.innerHTML = "";
-                    }
-                    textData += rowData.join("\t") + "\n";
-                }
-                e.clipboardData.setData('text/plain', textData.trim());
-                if(isCut) saveData();
-            }
-        };
-
-        document.addEventListener('copy', (e) => processClipboard(e, false));
-        document.addEventListener('cut', (e) => processClipboard(e, true));
-        document.addEventListener('paste', (e) => {
-            if (!targetCell) return;
-            e.preventDefault();
-            const text = e.clipboardData.getData('text/plain');
-            const rows = text.split(/\r?\n/), table = document.getElementById("postTable");
-            const startRow = targetCell.parentElement.rowIndex, startCol = targetCell.cellIndex;
-            rows.forEach((rowText, i) => {
-                rowText.split('\t').forEach((cellText, j) => {
-                    const targetRow = table.rows[startRow + i];
-                    if (targetRow && targetRow.cells[startCol + j] && (startCol + j) !== 0) {
-                        const cell = targetRow.cells[startCol + j];
-                        const input = cell.querySelector('.cell-input');
-                        const check = cell.querySelector('.collected-check');
-                        if(check) { check.checked = (cellText.toUpperCase() === "YES" || cellText === "true"); calculateTotalBalance(targetRow); }
-                        if(input) { input.innerHTML = cellText; input.classList.remove("placeholder-text"); calculateTotalBalance(targetRow); }
-                    }
-                });
-            });
-            saveData();
-        });
-
-        function addRowAt() {
-            const idx = targetCell.parentElement.rowIndex;
-            const body = document.getElementById("tableBody");
-            const newRow = body.insertRow(idx);
-            Array.from(document.querySelectorAll("#headerRow th")).forEach((th) => createCell(newRow, (th.innerText === "Date of Opening" ? "dd/mm/yyyy" : ""), -1, th.innerText));
-            updateRowNumbers(); saveData();
-        }
-
-        function deleteRowAt() { if(confirm("Delete row?")) { targetCell.parentElement.remove(); updateRowNumbers(); saveData(); } }
-
-        function addColumnAt() {
-            const colName = prompt("Column Name?", "New Column");
-            if (!colName) return;
-            const colIndex = targetCell.cellIndex;
-            document.getElementById("headerRow").insertBefore(createHeader(colName), document.getElementById("headerRow").cells[colIndex + 1]);
-            Array.from(document.getElementById("tableBody").rows).forEach(row => createCell(row, "", colIndex + 1, colName));
-            saveData();
-        }
-
-        function deleteColumnAt() {
-            if(confirm("Delete column?")) {
-                const colIndex = targetCell.cellIndex;
-                if(colIndex === 0) return;
-                document.getElementById("headerRow").deleteCell(colIndex);
-                Array.from(document.getElementById("tableBody").rows).forEach(row => row.deleteCell(colIndex));
-                saveData();
-            }
-        }
-    </script>
 </body>
 </html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subject Papers — AHSEC HS 2nd Year Guide</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 30px 20px; color: #222; line-height: 1.6; background: #fdfdfb; }
+  a.back { display: inline-block; margin-bottom: 20px; color: #1a5276; text-decoration: none; font-size: 14px; }
+  a.back:hover { text-decoration: underline; }
+  h1 { color: #7a1f1f; border-bottom: 3px solid #7a1f1f; padding-bottom: 10px; }
+  .year-card { background: #fff; border: 1px solid #e2e2e2; border-radius: 8px; padding: 18px 22px; margin: 16px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .year-label { font-size: 18px; font-weight: 600; color: #444; }
+  .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 20px; border: 1px solid transparent; font-family: inherit; cursor: pointer; }
+  .btn-qp { background: #7a1f1f; color: #fff; }
+  .btn-qp:hover { background: #5e1717; }
+  .btn-solved { background: #fff; color: #d4a017; border: 1px solid #d4a017; }
+  .btn-solved:hover { background: #fff8e6; }
+  .empty-state { background: #fff3cd; border: 1px solid #ffe08a; padding: 20px 25px; border-radius: 6px; margin-top: 20px; }
+  .loading { color: #888; padding: 20px 0; }
+  .btn.active { outline: 2px solid #444; outline-offset: 1px; }
+  #viewer-panel { display: none; margin-top: 24px; background: #fff; border: 1px solid #e2e2e2; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; }
+  #viewer-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #f4f0e8; border-bottom: 1px solid #e2e2e2; flex-wrap: wrap; gap: 8px; }
+  #viewer-title { font-weight: 600; color: #444; font-size: 14px; }
+  #viewer-actions a, #viewer-actions button { font-size: 13px; text-decoration: none; color: #1a5276; background: none; border: none; cursor: pointer; margin-left: 12px; }
+  #viewer-frame { width: 100%; height: 80vh; border: none; display: block; }
+  footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 13px; color: #777; }
+</style>
+</head>
+<body>
+
+<a class="back" id="back-link" href="index.html">← Back to Syllabus Guide</a>
+<h1 id="subject-title">Loading…</h1>
+<div id="content" class="loading">Fetching papers…</div>
+
+<div id="viewer-panel">
+  <div id="viewer-header">
+    <span id="viewer-title"></span>
+    <span id="viewer-actions">
+      <a id="viewer-newtab" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
+      <button id="viewer-close" type="button">Close ✕</button>
+    </span>
+  </div>
+  <iframe id="viewer-frame" src=""></iframe>
+</div>
+
+<footer>
+Question papers &amp; solved answers, year-wise. New years will be added as they become available.
+</footer>
+
+<script>
+function openPdf(path, label, btnEl) {
+  const panel = document.getElementById('viewer-panel');
+  const frame = document.getElementById('viewer-frame');
+  const title = document.getElementById('viewer-title');
+  const newTabLink = document.getElementById('viewer-newtab');
+
+  frame.src = encodeURI(path);
+  title.textContent = label;
+  newTabLink.href = encodeURI(path);
+  panel.style.display = 'block';
+
+  document.querySelectorAll('.btn.active').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.getElementById('viewer-close').addEventListener('click', () => {
+  const panel = document.getElementById('viewer-panel');
+  const frame = document.getElementById('viewer-frame');
+  panel.style.display = 'none';
+  frame.src = '';
+  document.querySelectorAll('.btn.active').forEach(b => b.classList.remove('active'));
+});
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('subject');
+  const titleEl = document.getElementById('subject-title');
+  const contentEl = document.getElementById('content');
+
+  const anchorMap = {
+    'english': 'english',
+    'bengali': 'bengali',
+    'political-science': 'polsci',
+    'logic-and-philosophy': 'logic',
+    'computer-science-and-application': 'compsci',
+    'tourism-and-hospitality': 'tourism'
+  };
+  const backLink = document.getElementById('back-link');
+  if (slug && anchorMap[slug]) {
+    backLink.href = 'index.html#' + anchorMap[slug];
+  }
+
+  if (!slug) {
+    titleEl.textContent = 'No subject specified';
+    contentEl.innerHTML = '<div class="empty-state">No subject was specified in the URL. Please go back and pick a subject.</div>';
+    return;
+  }
+
+  let data;
+  try {
+    const res = await fetch('data.json');
+    data = await res.json();
+  } catch (e) {
+    titleEl.textContent = 'Error';
+    contentEl.innerHTML = '<div class="empty-state">Could not load data.json. (' + e.message + ')</div>';
+    return;
+  }
+
+  const subject = data.subjects.find(s => s.slug === slug);
+
+  if (!subject) {
+    titleEl.textContent = 'Subject not found';
+    contentEl.innerHTML = '<div class="empty-state">No subject matching "' + slug + '" was found in data.json.</div>';
+    return;
+  }
+
+  titleEl.textContent = subject.name + ' — Question Papers';
+  document.title = subject.name + ' — AHSEC HS 2nd Year Guide';
+
+  if (!subject.papers || subject.papers.length === 0) {
+    contentEl.innerHTML = '<div class="empty-state">No question papers uploaded yet for ' + subject.name + '. Check back soon.</div>';
+    return;
+  }
+
+  const sorted = [...subject.papers].sort((a, b) => b.year - a.year);
+
+  contentEl.innerHTML = sorted.map((paper, i) => {
+    const qpLink = paper.qp
+      ? '<button type="button" class="btn btn-qp" data-path="' + paper.qp + '" data-label="' + subject.name + ' ' + paper.year + ' — Question Paper">📄 Question Paper</button>'
+      : '';
+    const solvedLink = paper.solved
+      ? '<button type="button" class="btn btn-solved" data-path="' + paper.solved + '" data-label="' + subject.name + ' ' + paper.year + ' — Solved Answers">✅ Solved Answers</button>'
+      : '';
+    return '<div class="year-card">'
+      + '<span class="year-label">' + paper.year + '</span>'
+      + '<div class="btn-group">' + qpLink + solvedLink + '</div>'
+      + '</div>';
+  }).join('');
+
+  contentEl.querySelectorAll('.btn[data-path]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openPdf(btn.getAttribute('data-path'), btn.getAttribute('data-label'), btn);
+    });
+  });
+}
+
+init();
+</script>
+
+</body>
+</html>
