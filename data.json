@@ -90,6 +90,16 @@
           "year": 2022,
           "qp":"exam_paper/Computer Science and Application/2022.pdf",
           "solved":"exam_paper/Computer Science and Application/2022_Solved.pdf"
+        },
+        {
+          "year": 2024,
+          "qp": "exam_paper/Computer Science and Application/2024.pdf",
+          "solved": "exam_paper/Computer Science and Application/2024_Solved.pdf"
+        },
+        {
+          "year": 0-26,
+          "qp":"exam_paper/Computer Science and Application/Practical_26.pdf",
+          "solved":"exam_paper/Computer Science and Application/Practical_26_Solved.pdf"
         }
       ]
     },
