@@ -99,7 +99,33 @@
       "slug": "logic-and-philosophy",
       "name": "Logic and Philosophy",
       "folder": "Logic and Philosophy",
-      "papers": []
+      "papers": [
+        {
+            "year": 2024,
+            "qp": "exam_paper/Logic and Philosophy/2024.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2024_Solved.pdf"
+        },
+        {
+            "year": 2019,
+            "qp": "exam_paper/Logic and Philosophy/2019.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2019_Solved.pdf"
+        },
+        {
+            "year": 2022,
+            "qp": "exam_paper/Logic and Philosophy/2022.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2022_Solved.pdf"
+        },
+        {
+            "year": 2025,
+            "qp": "exam_paper/Logic and Philosophy/2025.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2025_Solved.pdf"
+        },
+        {
+            "year": 2019,
+            "qp": "exam_paper/Logic and Philosophy/2019.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2019_Solved.pdf"
+        }
+      ]
     },
     {
       "slug": "computer-science-and-application",
