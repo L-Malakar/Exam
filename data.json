@@ -106,9 +106,9 @@
             "solved": "exam_paper/Logic and Philosophy/2024_Solved.pdf"
         },
         {
-            "year": 2019,
-            "qp": "exam_paper/Logic and Philosophy/2019.pdf",
-            "solved": "exam_paper/Logic and Philosophy/2019_Solved.pdf"
+            "year": 0,
+            "qp": "exam_paper/Logic and Philosophy/model.pdf",
+            "solved": "exam_paper/Logic and Philosophy/model_Solved.pdf"
         },
         {
             "year": 2022,
