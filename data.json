@@ -93,7 +93,43 @@
       "slug": "political-science",
       "name": "Political Science",
       "folder": "Political Science",
-      "papers": []
+      "papers": [
+        {
+            "year": 2019,
+            "qp": "exam_paper/Political Science/2019.pdf",
+            "solved": "exam_paper/Political Science/2019_Solved.pdf"
+        },
+        {
+            "year": 2020,
+            "qp": "exam_paper/Political Science/2020.pdf",
+            "solved": "exam_paper/Political Science/2020_Solved.pdf"
+        },
+        {
+            "year": 2022,
+            "qp": "exam_paper/Political Science/2022.pdf",
+            "solved": "exam_paper/Political Science/2022_Solved.pdf"
+        },
+        {
+            "year": 2023,
+            "qp": "exam_paper/Political Science/2023.pdf",
+            "solved": "exam_paper/Political Science/2023_Solved.pdf"
+        },
+        {
+            "year": 2024,
+            "qp": "exam_paper/Political Science/2024.pdf",
+            "solved": "exam_paper/Political Science/2024_Solved.pdf"
+        },
+        {
+            "year": 0,
+            "qp": "exam_paper/Political Science/model.pdf",
+            "solved": "exam_paper/Political Science/model_Solved.pdf"
+        },
+        {
+            "year": 2025,
+            "qp": "exam_paper/Political Science/2025.pdf",
+            "solved": "exam_paper/Political Science/2025_Solved.pdf"
+        }
+      ]
     },
     {
       "slug": "logic-and-philosophy",
