@@ -142,19 +142,9 @@
       "folder": "Logic and Philosophy",
       "papers": [
         {
-            "year": 2024,
-            "qp": "exam_paper/Logic and Philosophy/2024.pdf",
-            "solved": "exam_paper/Logic and Philosophy/2024_Solved.pdf"
-        },
-        {
-            "year": 0,
-            "qp": "exam_paper/Logic and Philosophy/model.pdf",
-            "solved": "exam_paper/Logic and Philosophy/model_Solved.pdf"
-        },
-        {
-            "year": 2022,
-            "qp": "exam_paper/Logic and Philosophy/2022.pdf",
-            "solved": "exam_paper/Logic and Philosophy/2022_Solved.pdf"
+            "year": 2026,
+            "qp": "exam_paper/Logic and Philosophy/2026.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2026_Solved.pdf"
         },
         {
             "year": 2025,
@@ -162,9 +152,39 @@
             "solved": "exam_paper/Logic and Philosophy/2025_Solved.pdf"
         },
         {
+            "year": 2024,
+            "qp": "exam_paper/Logic and Philosophy/2024.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2024_Solved.pdf"
+        },
+        {
+            "year": 2023,
+            "qp": "exam_paper/Logic and Philosophy/2023.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2023_Solved.pdf"
+        },
+        {
+            "year": 2022,
+            "qp": "exam_paper/Logic and Philosophy/2022.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2022_Solved.pdf"
+        },
+        {
+            "year": 2020,
+            "qp": "exam_paper/Logic and Philosophy/2020.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2020_Solved.pdf"
+        },
+        {
             "year": 2019,
             "qp": "exam_paper/Logic and Philosophy/2019.pdf",
             "solved": "exam_paper/Logic and Philosophy/2019_Solved.pdf"
+        },
+        {
+            "year": 2015,
+            "qp": "exam_paper/Logic and Philosophy/2015.pdf",
+            "solved": "exam_paper/Logic and Philosophy/2015_Solved.pdf"
+        },
+        {
+            "year": 0,
+            "qp": "exam_paper/Logic and Philosophy/model.pdf",
+            "solved": "exam_paper/Logic and Philosophy/model_Solved.pdf"
         }
       ]
     },
